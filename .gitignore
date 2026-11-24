@@ -35,3 +35,4 @@ htmlcov/
 *.db-shm
 *.db-wal
 *.db-journal
+backend/backups/*.db
