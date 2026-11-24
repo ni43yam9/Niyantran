@@ -16,7 +16,7 @@ def get_timeblocks(
     status: Optional[str] = None,
     category: Optional[str] = None,
 ) -> List[TimeblockResponse]:
-    query = db.query(DailyTimeblock)
+    query = db.query(DailyTimeblock).filter(DailyTimeblock.is_deleted == False)
     if block_date:
         query = query.filter(DailyTimeblock.block_date == block_date)
     if status:
@@ -28,7 +28,7 @@ def get_timeblocks(
     return [_format_block_response(b) for b in blocks]
 
 def get_timeblock_by_id(db: Session, block_id: str) -> Optional[TimeblockResponse]:
-    block = db.query(DailyTimeblock).filter(DailyTimeblock.id == block_id).first()
+    block = db.query(DailyTimeblock).filter(DailyTimeblock.id == block_id, DailyTimeblock.is_deleted == False).first()
     if not block:
         return None
     return _format_block_response(block)
@@ -71,7 +71,7 @@ def create_timeblock(db: Session, block_in: TimeblockCreate) -> TimeblockRespons
     return _format_block_response(block)
 
 def update_timeblock(db: Session, block_id: str, block_in: TimeblockUpdate) -> Optional[TimeblockResponse]:
-    block = db.query(DailyTimeblock).filter(DailyTimeblock.id == block_id).first()
+    block = db.query(DailyTimeblock).filter(DailyTimeblock.id == block_id, DailyTimeblock.is_deleted == False).first()
     if not block:
         return None
 
@@ -81,6 +81,7 @@ def update_timeblock(db: Session, block_id: str, block_in: TimeblockUpdate) -> O
     for field, val in update_data.items():
         setattr(block, field, val)
 
+    block.version = (block.version or 1) + 1
     block.updated_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(block)
@@ -126,10 +127,14 @@ def update_timeblock(db: Session, block_id: str, block_in: TimeblockUpdate) -> O
     return _format_block_response(block)
 
 def delete_timeblock(db: Session, block_id: str) -> bool:
-    block = db.query(DailyTimeblock).filter(DailyTimeblock.id == block_id).first()
+    block = db.query(DailyTimeblock).filter(DailyTimeblock.id == block_id, DailyTimeblock.is_deleted == False).first()
     if not block:
         return False
-    db.delete(block)
+    now_utc = datetime.now(timezone.utc)
+    block.is_deleted = True
+    block.deleted_at = now_utc
+    block.version = (block.version or 1) + 1
+    block.updated_at = now_utc
     db.commit()
     return True
 

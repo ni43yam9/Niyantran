@@ -11,7 +11,9 @@ class ActivityLog(Base):
     """
     __tablename__ = "activity_logs"
 
-    id = Column(String(50), primary_key=True, default=lambda: f"act_{uuid.uuid4().hex[:12]}")
+    id = Column(String(50), primary_key=True, default=lambda: f"act_{uuid.uuid4().hex}")
+    user_id = Column(String(50), nullable=False, default="default_user", index=True)
+    device_id = Column(String(50), nullable=True, default="local_device", index=True)
     event_type = Column(String(50), nullable=False, index=True)
     entity_type = Column(String(30), nullable=False, index=True)  # 'task', 'habit', 'timeblock', 'plan'
     entity_id = Column(String(100), nullable=True, index=True)
@@ -30,6 +32,8 @@ class ActivityLog(Base):
     __table_args__ = (
         Index("ix_activity_entity", "entity_type", "entity_id"),
         Index("ix_activity_type_time", "event_type", "timestamp"),
+        Index("ix_activity_event_entity", "event_type", "entity_type"),
+        Index("ix_activity_user_time", "user_id", "timestamp"),
     )
 
     def __repr__(self) -> str:

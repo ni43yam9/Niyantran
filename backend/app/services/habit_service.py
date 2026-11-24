@@ -13,6 +13,8 @@ def _format_habit_response(habit: Habit) -> HabitResponse:
     logs_resp = []
     if habit.logs:
         for log in habit.logs:
+            if getattr(log, "is_deleted", False):
+                continue
             date_str = log.log_date.isoformat()
             if log.completed:
                 completed_dates[date_str] = True
@@ -32,24 +34,30 @@ def _format_habit_response(habit: Habit) -> HabitResponse:
         logs=logs_resp,
     )
 
-def get_habits(db: Session, include_archived: bool = False) -> List[HabitResponse]:
-    query = db.query(Habit)
+def get_habits(db: Session, include_archived: bool = False, user_id: Optional[str] = None) -> List[HabitResponse]:
+    query = db.query(Habit).filter(Habit.is_deleted == False)
+    if user_id:
+        query = query.filter(Habit.user_id == user_id)
     if not include_archived:
         query = query.filter(Habit.archived == False)
     habits = query.order_by(Habit.created_at.asc()).all()
     return [_format_habit_response(h) for h in habits]
 
-def get_habit_by_id(db: Session, habit_id: str) -> Optional[HabitResponse]:
-    habit = db.query(Habit).filter(Habit.id == habit_id).first()
+def get_habit_by_id(db: Session, habit_id: str, user_id: Optional[str] = None) -> Optional[HabitResponse]:
+    query = db.query(Habit).filter(Habit.id == habit_id, Habit.is_deleted == False)
+    if user_id:
+        query = query.filter(Habit.user_id == user_id)
+    habit = query.first()
     if not habit:
         return None
     return _format_habit_response(habit)
 
-def create_habit(db: Session, habit_in: HabitCreate) -> HabitResponse:
+def create_habit(db: Session, habit_in: HabitCreate, user_id: Optional[str] = None) -> HabitResponse:
     habit_id = habit_in.id or f"h-{uuid.uuid4().hex[:8]}"
     
     habit = Habit(
         id=habit_id,
+        user_id=user_id or "default_user",
         name=habit_in.name,
         target=habit_in.target,
         category=habit_in.category or "General",
@@ -68,6 +76,7 @@ def create_habit(db: Session, habit_in: HabitCreate) -> HabitResponse:
                     d = date.fromisoformat(date_str)
                     log = HabitLog(
                         id=f"hl-{uuid.uuid4().hex[:12]}",
+                        user_id=user_id or "default_user",
                         habit_id=habit.id,
                         log_date=d,
                         completed=True,
@@ -80,8 +89,11 @@ def create_habit(db: Session, habit_in: HabitCreate) -> HabitResponse:
     db.refresh(habit)
     return _format_habit_response(habit)
 
-def update_habit(db: Session, habit_id: str, habit_in: HabitUpdate) -> Optional[HabitResponse]:
-    habit = db.query(Habit).filter(Habit.id == habit_id).first()
+def update_habit(db: Session, habit_id: str, habit_in: HabitUpdate, user_id: Optional[str] = None) -> Optional[HabitResponse]:
+    query = db.query(Habit).filter(Habit.id == habit_id, Habit.is_deleted == False)
+    if user_id:
+        query = query.filter(Habit.user_id == user_id)
+    habit = query.first()
     if not habit:
         return None
 
@@ -89,21 +101,47 @@ def update_habit(db: Session, habit_id: str, habit_in: HabitUpdate) -> Optional[
     for field, val in update_data.items():
         setattr(habit, field, val)
 
+    habit.version = (habit.version or 1) + 1
     habit.updated_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(habit)
     return _format_habit_response(habit)
 
-def delete_habit(db: Session, habit_id: str) -> bool:
-    habit = db.query(Habit).filter(Habit.id == habit_id).first()
+def delete_habit(db: Session, habit_id: str, soft_delete: bool = False, user_id: Optional[str] = None) -> bool:
+    query = db.query(Habit).filter(Habit.id == habit_id)
+    if user_id:
+        query = query.filter(Habit.user_id == user_id)
+    habit = query.first()
     if not habit:
         return False
-    db.delete(habit)
-    db.commit()
-    return True
+    if soft_delete:
+        now_utc = datetime.now(timezone.utc)
+        habit.is_deleted = True
+        habit.deleted_at = now_utc
+        habit.version = (habit.version or 1) + 1
+        habit.updated_at = now_utc
+        # Soft delete associated habit logs
+        db.query(HabitLog).filter(HabitLog.habit_id == habit_id).update({
+            "is_deleted": True,
+            "deleted_at": now_utc,
+            "updated_at": now_utc,
+        })
+        db.commit()
+        return True
+    else:
+        # Cascade delete for full schema compliance
+        db.delete(habit)
+        db.commit()
+        return True
 
-def toggle_habit_log(db: Session, habit_id: str, log_date: date, completed: Optional[bool] = None) -> Optional[HabitResponse]:
-    habit = db.query(Habit).filter(Habit.id == habit_id).first()
+def soft_delete_habit(db: Session, habit_id: str, user_id: Optional[str] = None) -> bool:
+    return delete_habit(db, habit_id, soft_delete=True, user_id=user_id)
+
+def toggle_habit_log(db: Session, habit_id: str, log_date: date, completed: Optional[bool] = None, user_id: Optional[str] = None) -> Optional[HabitResponse]:
+    query = db.query(Habit).filter(Habit.id == habit_id, Habit.is_deleted == False)
+    if user_id:
+        query = query.filter(Habit.user_id == user_id)
+    habit = query.first()
     if not habit:
         return None
 
@@ -112,6 +150,7 @@ def toggle_habit_log(db: Session, habit_id: str, log_date: date, completed: Opti
         HabitLog.log_date == log_date,
     ).first()
 
+    now_utc = datetime.now(timezone.utc)
     final_completed = True
     if existing_log:
         if completed is not None:
@@ -119,18 +158,29 @@ def toggle_habit_log(db: Session, habit_id: str, log_date: date, completed: Opti
         else:
             existing_log.completed = not existing_log.completed
         final_completed = existing_log.completed
+        existing_log.version = (existing_log.version or 1) + 1
+        existing_log.updated_at = now_utc
+        existing_log.is_deleted = False
+        existing_log.deleted_at = None
     else:
         new_val = completed if completed is not None else True
         new_log = HabitLog(
             id=f"hl-{uuid.uuid4().hex[:12]}",
-            habit_id=habit_id,
+            user_id=user_id or "default_user",
+            habit_id=habit.id,
             log_date=log_date,
             completed=new_val,
+            version=1,
+            is_deleted=False,
+            deleted_at=None,
+            created_at=now_utc,
+            updated_at=now_utc,
         )
         db.add(new_log)
         final_completed = new_val
 
-    habit.updated_at = datetime.now(timezone.utc)
+    habit.version = (habit.version or 1) + 1
+    habit.updated_at = now_utc
     db.commit()
     db.refresh(habit)
 

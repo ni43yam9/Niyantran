@@ -47,12 +47,12 @@ export function Modal({
 
       {/* Dialog card */}
       <div
-        className={`relative w-full ${sizeClasses[size] || sizeClasses.md} bg-white dark:bg-[#131B2E] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-modal overflow-hidden z-10 transition-all transform duration-200 ease-out my-8`}
+        className={`relative w-full ${sizeClasses[size] || sizeClasses.md} glass-modal rounded-2xl shadow-modal overflow-hidden z-10 transition-all transform duration-200 ease-out my-8`}
         role="dialog"
         aria-modal="true"
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4.5 border-b border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/40">
+        <div className="flex items-center justify-between px-6 py-4.5 border-b border-white/60 dark:border-white/10 bg-white/30 dark:bg-black/20">
           <div>
             <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
               {title}

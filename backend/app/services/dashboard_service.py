@@ -21,17 +21,17 @@ CATEGORY_COLORS = {
 def get_dashboard_summary(db: Session) -> DashboardSummaryResponse:
     today = date.today()
 
-    total_tasks = db.query(func.count(Task.id)).scalar() or 0
+    total_tasks = db.query(func.count(Task.id)).filter(Task.is_deleted == False).scalar() or 0
     completed_tasks = (
         db.query(func.count(Task.id))
-        .filter(Task.status == "Completed")
+        .filter(and_(Task.status == "Completed", Task.is_deleted == False))
         .scalar()
         or 0
     )
     pending_tasks = total_tasks - completed_tasks
     active_goals = (
         db.query(func.count(Goal.id))
-        .filter(Goal.status != "Completed")
+        .filter(and_(Goal.status != "Completed", Goal.is_deleted == False))
         .scalar()
         or 0
     )
@@ -40,13 +40,13 @@ def get_dashboard_summary(db: Session) -> DashboardSummaryResponse:
     )
     overdue_count = (
         db.query(func.count(Task.id))
-        .filter(and_(Task.status != "Completed", Task.due_date < today))
+        .filter(and_(Task.status != "Completed", Task.due_date < today, Task.is_deleted == False))
         .scalar()
         or 0
     )
     due_today_count = (
         db.query(func.count(Task.id))
-        .filter(and_(Task.status != "Completed", Task.due_date == today))
+        .filter(and_(Task.status != "Completed", Task.due_date == today, Task.is_deleted == False))
         .scalar()
         or 0
     )
@@ -64,7 +64,7 @@ def get_dashboard_summary(db: Session) -> DashboardSummaryResponse:
     # Tasks due today or starting today
     tasks_today_orm = (
         db.query(Task)
-        .filter(or_(Task.due_date == today, Task.start_date == today))
+        .filter(and_(Task.is_deleted == False, or_(Task.due_date == today, Task.start_date == today)))
         .order_by(Task.status.desc(), Task.priority.asc())
         .limit(20)
         .all()
@@ -74,7 +74,7 @@ def get_dashboard_summary(db: Session) -> DashboardSummaryResponse:
     # Top priorities
     high_tasks = (
         db.query(Task)
-        .filter(and_(Task.priority == "High", Task.status != "Completed"))
+        .filter(and_(Task.priority == "High", Task.status != "Completed", Task.is_deleted == False))
         .order_by(Task.due_date.asc())
         .limit(3)
         .all()
@@ -95,7 +95,7 @@ def get_dashboard_summary(db: Session) -> DashboardSummaryResponse:
         needed = 3 - len(top_priorities)
         high_goals = (
             db.query(Goal)
-            .filter(and_(Goal.priority == "High", Goal.status != "Completed"))
+            .filter(and_(Goal.priority == "High", Goal.status != "Completed", Goal.is_deleted == False))
             .order_by(Goal.target_date.asc())
             .limit(needed)
             .all()
@@ -115,6 +115,7 @@ def get_dashboard_summary(db: Session) -> DashboardSummaryResponse:
     # Category distribution
     cat_counts = (
         db.query(Task.category, func.count(Task.id))
+        .filter(Task.is_deleted == False)
         .group_by(Task.category)
         .all()
     )

@@ -4,9 +4,18 @@
  * and graceful fallback handling for Phase 2 backend integration.
  */
 
-const API_BASE_URL =
-  (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL) ||
-  'http://localhost:8000/api';
+function resolveApiBaseUrl() {
+  if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  // When running in a browser, relative path '/api' works seamlessly on localhost, LAN IP, and public HTTPS
+  if (typeof window !== 'undefined') {
+    return '/api';
+  }
+  return 'http://localhost:8000/api';
+}
+
+const API_BASE_URL = resolveApiBaseUrl();
 
 const DEFAULT_TIMEOUT_MS = 6000;
 
@@ -26,9 +35,31 @@ async function request(endpoint, options = {}) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeout);
 
+  const authHeaders = {};
+  const storedApiKey =
+    typeof window !== 'undefined' && window.localStorage
+      ? window.localStorage.getItem('niyantra_api_key')
+      : null;
+  const apiKey =
+    (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_KEY) ||
+    storedApiKey;
+
+  if (apiKey) {
+    authHeaders['X-API-Key'] = apiKey;
+  }
+
+  const storedToken =
+    typeof window !== 'undefined' && window.localStorage
+      ? window.localStorage.getItem('niyantra_access_token')
+      : null;
+  if (storedToken) {
+    authHeaders['Authorization'] = `Bearer ${storedToken}`;
+  }
+
   const config = {
     headers: {
       'Content-Type': 'application/json',
+      ...authHeaders,
       ...headers,
     },
     signal: controller.signal,
@@ -92,6 +123,30 @@ export const api = {
       return { online: false, data: null };
     }
   },
+};
+
+export const authApi = {
+  register: (name, email, password) =>
+    api.post('/auth/register', { name, email, password }),
+  login: (email, password) =>
+    api.post('/auth/login', { email, password }),
+  logout: () =>
+    api.post('/auth/logout', {}),
+  getMe: () =>
+    api.get('/auth/me'),
+};
+
+export const devicesApi = {
+  register: (deviceData) =>
+    api.post('/devices/register', deviceData),
+  list: (includeRevoked = true) =>
+    api.get(`/devices?include_revoked=${includeRevoked}`),
+  get: (deviceId) =>
+    api.get(`/devices/${deviceId}`),
+  update: (deviceId, data) =>
+    api.patch(`/devices/${deviceId}`, data),
+  revoke: (deviceId) =>
+    api.post(`/devices/${deviceId}/revoke`, {}),
 };
 
 export { API_BASE_URL, ApiError };

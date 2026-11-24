@@ -20,8 +20,8 @@ import { useTheme } from '../../context/ThemeContext';
 function CustomTooltip({ active, payload, label }) {
   if (active && payload && payload.length) {
     return (
-      <div className="p-3 rounded-xl shadow-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs space-y-1 font-medium">
-        <p className="font-bold border-b border-slate-100 dark:border-slate-800 pb-1 mb-1">
+      <div className="p-3 rounded-2xl glass-modal text-slate-900 dark:text-slate-100 text-xs space-y-1 font-medium border border-white/60 dark:border-white/10 shadow-lg">
+        <p className="font-bold border-b border-white/50 dark:border-white/10 pb-1 mb-1">
           {label}
         </p>
         {payload.map((entry, index) => (
@@ -47,10 +47,12 @@ export function ProductivitySection() {
   const { theme } = useTheme();
 
   const isDark = theme === 'dark';
-  const gridColor = isDark ? '#1E293B' : '#F1F5F9';
-  const textColor = isDark ? '#94A3B8' : '#64748B';
-  const tooltipBg = isDark ? '#111827' : '#FFFFFF';
-  const tooltipBorder = isDark ? '#1F293D' : '#E2E8F0';
+  const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(36, 60, 50, 0.08)';
+  const textColor = isDark ? '#9BB3A5' : '#718579';
+  const primaryColor = isDark ? '#75B798' : '#568B75';
+  const plannedColor = isDark ? 'rgba(255, 255, 255, 0.12)' : '#C9DFD1';
+  const tooltipBg = isDark ? 'rgba(18, 32, 28, 0.95)' : 'rgba(255, 255, 255, 0.95)';
+  const tooltipBorder = isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 0.85)';
 
   return (
     <div className="space-y-6">
@@ -63,7 +65,7 @@ export function ProductivitySection() {
             Velocity metrics, completion trends, and subject allocations
           </p>
         </div>
-        <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 border border-indigo-200/60 dark:border-indigo-800/60">
+        <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-[#568B75]/15 dark:bg-[#75B798]/20 text-[#568B75] dark:text-[#75B798] border border-[#568B75]/30 dark:border-[#75B798]/30">
           Last 7 Days
         </span>
       </div>
@@ -86,27 +88,27 @@ export function ProductivitySection() {
                 <Bar
                   dataKey="completed"
                   name="Completed"
-                  fill="#4F46E5"
-                  radius={[4, 4, 0, 0]}
+                  fill={primaryColor}
+                  radius={[6, 6, 0, 0]}
                   barSize={14}
                 />
                 <Bar
                   dataKey="planned"
                   name="Planned"
-                  fill={isDark ? '#334155' : '#CBD5E1'}
-                  radius={[4, 4, 0, 0]}
+                  fill={plannedColor}
+                  radius={[6, 6, 0, 0]}
                   barSize={14}
                 />
               </BarChart>
             </ResponsiveContainer>
           </div>
-          <div className="flex items-center justify-center gap-6 mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 text-xs text-slate-500">
+          <div className="flex items-center justify-center gap-6 mt-3 pt-3 border-t border-white/60 dark:border-white/10 text-xs text-slate-500 dark:text-slate-400">
             <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-indigo-600" />
+              <span className="w-2.5 h-2.5 rounded-full bg-[#568B75] dark:bg-[#75B798]" />
               <span>Completed</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-slate-300 dark:bg-slate-700" />
+              <span className="w-2.5 h-2.5 rounded-full bg-[#C9DFD1] dark:bg-white/20" />
               <span>Planned</span>
             </div>
           </div>
@@ -124,8 +126,8 @@ export function ProductivitySection() {
               <AreaChart data={weeklyChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="focusGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#06B6D4" stopOpacity={0.4} />
-                    <stop offset="95%" stopColor="#06B6D4" stopOpacity={0.0} />
+                    <stop offset="5%" stopColor={primaryColor} stopOpacity={0.4} />
+                    <stop offset="95%" stopColor={primaryColor} stopOpacity={0.0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
@@ -136,7 +138,7 @@ export function ProductivitySection() {
                   type="monotone"
                   dataKey="focusHours"
                   name="Focus Hours"
-                  stroke="#06B6D4"
+                  stroke={primaryColor}
                   strokeWidth={2.5}
                   fillOpacity={1}
                   fill="url(#focusGradient)"
@@ -144,9 +146,9 @@ export function ProductivitySection() {
               </AreaChart>
             </ResponsiveContainer>
           </div>
-          <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 text-xs">
-            <span className="text-slate-500">Weekly Total: 33.2 hrs</span>
-            <span className="font-semibold text-cyan-600 dark:text-cyan-400">
+          <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/60 dark:border-white/10 text-xs">
+            <span className="text-slate-500 dark:text-slate-400">Weekly Total: 33.2 hrs</span>
+            <span className="font-semibold text-[#568B75] dark:text-[#75B798]">
               Avg 4.7 hrs/day
             </span>
           </div>
@@ -180,8 +182,8 @@ export function ProductivitySection() {
                   contentStyle={{
                     backgroundColor: tooltipBg,
                     borderColor: tooltipBorder,
-                    borderRadius: '0.75rem',
-                    color: isDark ? '#fff' : '#000',
+                    borderRadius: '1rem',
+                    color: isDark ? '#E8F3EC' : '#243C32',
                     fontSize: '12px',
                   }}
                 />
@@ -189,7 +191,7 @@ export function ProductivitySection() {
             </ResponsiveContainer>
           </div>
           {/* Custom Category Legend */}
-          <div className="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px]">
+          <div className="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-white/60 dark:border-white/10 text-[11px]">
             {categoryDistributionData.map((cat) => (
               <div key={cat.name} className="flex items-center gap-1.5 truncate">
                 <span

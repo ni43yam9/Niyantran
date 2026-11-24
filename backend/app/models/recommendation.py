@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime, timezone, date
-from sqlalchemy import Column, String, Text, Date, DateTime, JSON, Index
+from sqlalchemy import Column, String, Text, Date, DateTime, Boolean, Integer, JSON, Index
 from backend.app.database import Base
 
 class Recommendation(Base):
@@ -10,7 +10,8 @@ class Recommendation(Base):
     """
     __tablename__ = "recommendations"
 
-    id = Column(String(50), primary_key=True, default=lambda: f"rec_{uuid.uuid4().hex[:12]}")
+    id = Column(String(50), primary_key=True, default=lambda: f"rec_{uuid.uuid4().hex}")
+    user_id = Column(String(50), nullable=False, default="default_user", index=True)
     type = Column(String(50), nullable=False, index=True)      # PRIORITIZATION, DEADLINE_RISK, WORKLOAD_BALANCE, GOAL_PROGRESS, HABIT_IMPROVEMENT
     category = Column(String(30), nullable=False, index=True)  # Task, Goal, Habit, Schedule
     title = Column(String(200), nullable=False)
@@ -24,12 +25,19 @@ class Recommendation(Base):
     entity_id = Column(String(100), nullable=True, index=True) # Linked task_id, goal_id, or habit_id
     target_date = Column(Date, nullable=True, index=True)
 
+    # Synchronization & Soft Deletion Fields
+    version = Column(Integer, nullable=False, default=1)
+    is_deleted = Column(Boolean, nullable=False, default=False, index=True)
+    deleted_at = Column(DateTime, nullable=True)
+
     created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
     updated_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     __table_args__ = (
         Index("ix_recommendation_status_date", "status", "target_date"),
         Index("ix_recommendation_type_entity", "type", "entity_id", "status"),
+        Index("ix_recommendation_is_deleted", "is_deleted"),
+        Index("ix_recommendation_sync", "user_id", "version", "updated_at"),
     )
 
     def __repr__(self) -> str:

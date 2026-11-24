@@ -1,0 +1,34 @@
+{
+  "short_name": "Niyantran",
+  "name": "Niyantran Personal Productivity System",
+  "description": "Offline-first, multi-device productivity application with autonomous AI intelligence",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.png",
+      "type": "image/png",
+      "sizes": "396x360",
+      "purpose": "any"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#101C18",
+  "theme_color": "#568B75",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "categories": [
+    "productivity",
+    "utilities"
+  ]
+}

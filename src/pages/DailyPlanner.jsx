@@ -26,6 +26,7 @@ import { Input, Select } from '../components/common/FormControls';
 import { useApp } from '../context/AppContext';
 import { getTodayString } from '../utils/dateUtils';
 import { timeblockService } from '../services/timeblockService';
+import { dailyIntentRepository, timeblockRepository } from '../database';
 
 // Time arithmetic helpers
 function parseTimeToMinutes(timeStr) {
@@ -125,10 +126,31 @@ export function DailyPlanner() {
     };
   });
 
-  // Fetch timeblocks from backend on mount or date change
+  // Load timeblocks & intents from IndexedDB on mount or date change, then sync from backend
   useEffect(() => {
     let active = true;
-    async function fetchBlocks() {
+
+    async function loadClientData() {
+      try {
+        // Load intents map from IndexedDB
+        const intentMap = await dailyIntentRepository.getMap();
+        if (active && Object.keys(intentMap).length > 0) {
+          setDailyIntents((prev) => ({ ...prev, ...intentMap }));
+        }
+
+        // Load timeblocks from IndexedDB for selected date
+        const localBlocks = await timeblockRepository.getByDate(selectedDateStr);
+        if (active && Array.isArray(localBlocks) && localBlocks.length > 0) {
+          setDateBlocksMap((prev) => ({
+            ...prev,
+            [selectedDateStr]: localBlocks,
+          }));
+        }
+      } catch (err) {
+        console.warn('IndexedDB planner load notice:', err);
+      }
+
+      // Then attempt backend fetch if online
       try {
         const blocks = await timeblockService.getTimeblocks(selectedDateStr);
         if (active && Array.isArray(blocks) && blocks.length > 0) {
@@ -136,12 +158,16 @@ export function DailyPlanner() {
             ...prev,
             [selectedDateStr]: blocks,
           }));
+          // Cache backend blocks into IndexedDB
+          await timeblockRepository.saveForDate(selectedDateStr, blocks);
         }
       } catch (err) {
+        // Fallback gracefully to IndexedDB offline storage
         console.warn('Backend timeblocks fetch fallback:', err);
       }
     }
-    fetchBlocks();
+
+    loadClientData();
     return () => {
       active = false;
     };
@@ -178,21 +204,30 @@ export function DailyPlanner() {
     };
   }, [currentBlocks]);
 
-  // Save changes to localStorage
+  // Save changes to localStorage and IndexedDB
   const updateBlocksForDate = (dateStr, newBlocks) => {
     setDateBlocksMap((prev) => {
       const updated = { ...prev, [dateStr]: newBlocks };
       localStorage.setItem('niyantra_daily_timeblocks', JSON.stringify(updated));
       return updated;
     });
+    // Persist to IndexedDB
+    timeblockRepository.saveForDate(dateStr, newBlocks).catch((err) => {
+      console.warn('Failed saving blocks to IndexedDB:', err);
+    });
   };
 
   const handleSaveIntent = () => {
     if (!intentInput.trim()) return;
+    const trimmed = intentInput.trim();
     setDailyIntents((prev) => {
-      const updated = { ...prev, [selectedDateStr]: intentInput.trim() };
+      const updated = { ...prev, [selectedDateStr]: trimmed };
       localStorage.setItem('niyantra_daily_intents', JSON.stringify(updated));
       return updated;
+    });
+    // Persist to IndexedDB
+    dailyIntentRepository.save(selectedDateStr, trimmed).catch((err) => {
+      console.warn('Failed saving daily intent to IndexedDB:', err);
     });
     setIsEditingIntent(false);
   };
@@ -426,15 +461,18 @@ export function DailyPlanner() {
     });
 
     const keptToday = currentBlocks.filter((b) => b.status === 'Completed' || b.isBreak);
+    const updatedTomorrowBlocks = [...tomorrowBlocks, ...rolledOver];
     setDateBlocksMap((prev) => {
       const updated = {
         ...prev,
         [selectedDateStr]: keptToday,
-        [tomorrowStr]: [...tomorrowBlocks, ...rolledOver],
+        [tomorrowStr]: updatedTomorrowBlocks,
       };
       localStorage.setItem('niyantra_daily_timeblocks', JSON.stringify(updated));
       return updated;
     });
+    timeblockRepository.saveForDate(selectedDateStr, keptToday).catch((e) => console.warn(e));
+    timeblockRepository.saveForDate(tomorrowStr, updatedTomorrowBlocks).catch((e) => console.warn(e));
   };
 
   // Postpone single block to tomorrow
@@ -466,15 +504,20 @@ export function DailyPlanner() {
       }
     }
 
+    const updatedTodayBlocks = (dateBlocksMap[selectedDateStr] || []).filter((b) => b.id !== block.id);
+    const updatedTomorrowBlocks = [...tomorrowBlocks, newTomorrowBlock];
+
     setDateBlocksMap((prev) => {
       const updated = {
         ...prev,
-        [selectedDateStr]: prev[selectedDateStr].filter((b) => b.id !== block.id),
-        [tomorrowStr]: [...tomorrowBlocks, newTomorrowBlock],
+        [selectedDateStr]: updatedTodayBlocks,
+        [tomorrowStr]: updatedTomorrowBlocks,
       };
       localStorage.setItem('niyantra_daily_timeblocks', JSON.stringify(updated));
       return updated;
     });
+    timeblockRepository.saveForDate(selectedDateStr, updatedTodayBlocks).catch((e) => console.warn(e));
+    timeblockRepository.saveForDate(tomorrowStr, updatedTomorrowBlocks).catch((e) => console.warn(e));
   };
 
   // Clear blocks for selected day
@@ -620,16 +663,16 @@ export function DailyPlanner() {
   return (
     <div className="space-y-5 animate-in fade-in duration-200">
       {/* Top Bar: Date Navigation & Quick Actions */}
-      <div className="bg-white dark:bg-[#111827] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-4 shadow-card flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="glass-card p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <h2 className="text-lg font-bold text-slate-900 dark:text-white">
           {dateDetails.display}
         </h2>
 
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 p-0.5">
+          <div className="flex items-center rounded-lg border border-white/60 dark:border-white/10 bg-white/40 dark:bg-white/5 p-0.5">
             <button
               onClick={() => setSelectedDateStr((curr) => offsetDateString(curr, -1))}
-              className="p-1.5 rounded-md hover:bg-white dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors"
+              className="p-1.5 rounded-md hover:bg-white/50 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
@@ -637,15 +680,15 @@ export function DailyPlanner() {
               onClick={() => setSelectedDateStr(getTodayString())}
               className={`px-3 py-1 text-xs font-semibold rounded-md transition-colors ${
                 dateDetails.isToday
-                  ? 'bg-indigo-600 text-white shadow-xs'
-                  : 'text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800'
+                  ? 'bg-primary-600 dark:bg-primary-500 text-white shadow-xs'
+                  : 'text-slate-600 dark:text-slate-300 hover:bg-white/50 dark:hover:bg-white/10'
               }`}
             >
               Today
             </button>
             <button
               onClick={() => setSelectedDateStr((curr) => offsetDateString(curr, 1))}
-              className="p-1.5 rounded-md hover:bg-white dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors"
+              className="p-1.5 rounded-md hover:bg-white/50 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 transition-colors"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -656,7 +699,7 @@ export function DailyPlanner() {
             size="sm"
             icon={Sparkles}
             onClick={handleAutoSchedule}
-            className="shadow-xs bg-indigo-600 hover:bg-indigo-700 text-white text-xs"
+            className="shadow-xs text-xs"
           >
             Auto-Schedule
           </Button>
@@ -684,10 +727,10 @@ export function DailyPlanner() {
       </div>
 
       {/* Workload Capacity Bar */}
-      <div className="bg-white dark:bg-[#111827] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-3.5 shadow-card">
+      <div className="glass-card p-3.5">
         <div className="flex items-center justify-between gap-2 mb-2">
           <div className="flex items-center gap-2">
-            <Clock className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+            <Clock className="w-3.5 h-3.5 text-primary-600 dark:text-primary-400" />
             <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
               Workload Capacity:
             </span>
@@ -704,14 +747,14 @@ export function DailyPlanner() {
           )}
         </div>
 
-        <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+        <div className="w-full bg-slate-200/50 dark:bg-white/10 h-2 rounded-full overflow-hidden">
           <div
             className={`h-full transition-all duration-300 rounded-full ${
               isOverbooked
                 ? 'bg-rose-500'
                 : capacityPercent > 80
                 ? 'bg-amber-500'
-                : 'bg-indigo-600 dark:bg-indigo-500'
+                : 'bg-primary-600 dark:bg-primary-500'
             }`}
             style={{ width: `${Math.min(capacityPercent, 100)}%` }}
           />
@@ -719,9 +762,9 @@ export function DailyPlanner() {
       </div>
 
       {/* Primary Focus Banner */}
-      <div className="p-3 rounded-xl bg-indigo-50/60 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/40 flex items-center justify-between gap-3">
+      <div className="p-3 rounded-xl bg-white/40 dark:bg-white/5 border border-white/60 dark:border-white/10 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5 flex-1 min-w-0">
-          <Target className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
+          <Target className="w-4 h-4 text-primary-600 dark:text-primary-400 shrink-0" />
           {isEditingIntent ? (
             <div className="flex-1 flex items-center gap-2">
               <input
@@ -729,7 +772,7 @@ export function DailyPlanner() {
                 value={intentInput}
                 onChange={(e) => setIntentInput(e.target.value)}
                 placeholder="What is your primary focus today?"
-                className="w-full text-xs px-2.5 py-1 rounded-lg border border-indigo-300 dark:border-indigo-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                className="w-full text-xs px-2.5 py-1 rounded-lg border border-white/60 dark:border-white/10 bg-white/60 dark:bg-white/5 text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-primary-500"
               />
               <Button size="xs" variant="primary" onClick={handleSaveIntent}>
                 Save
@@ -739,7 +782,7 @@ export function DailyPlanner() {
               </Button>
             </div>
           ) : (
-            <p className="text-xs text-indigo-950 dark:text-indigo-200 font-medium truncate">
+            <p className="text-xs text-slate-800 dark:text-slate-200 font-medium truncate">
               {currentIntent}
             </p>
           )}
@@ -751,7 +794,7 @@ export function DailyPlanner() {
               setIntentInput(currentIntent);
               setIsEditingIntent(true);
             }}
-            className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 shrink-0 font-medium ml-2"
+            className="text-xs text-primary-600 dark:text-primary-400 hover:underline flex items-center gap-1 shrink-0 font-medium ml-2"
           >
             <Edit2 className="w-3 h-3" />
             Edit
@@ -761,7 +804,7 @@ export function DailyPlanner() {
 
       {/* Planned vs Actual Productivity Banner */}
       {plannedVsActualDayStats && (
-        <div className="p-3.5 rounded-xl bg-white dark:bg-[#111827] border border-slate-200/90 dark:border-slate-800 shadow-card flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in duration-200">
+        <div className="glass-card p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in duration-200">
           <div className="flex items-center gap-2.5">
             <span className="text-base">⏱️</span>
             <div>
@@ -786,7 +829,7 @@ export function DailyPlanner() {
                 Completed faster ({Math.abs(plannedVsActualDayStats.variance)}m ahead of schedule)
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-400 border border-indigo-200/80 dark:border-indigo-800/80">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-primary-50 dark:bg-primary-950/60 text-primary-700 dark:text-primary-400 border border-primary-200/80 dark:border-primary-800/80">
                 Exact match with planned estimation
               </span>
             )}

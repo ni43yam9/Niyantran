@@ -210,26 +210,26 @@ export function Habits() {
     <div className="space-y-6 animate-in fade-in duration-200">
       {/* Habit Metrics Banner */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="bg-white dark:bg-[#111827] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-4.5 shadow-card">
+        <div className="glass-card p-4.5 rounded-2xl">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
               Weekly Consistency
             </span>
-            <Trophy className="w-5 h-5 text-indigo-500" />
+            <Trophy className="w-5 h-5 text-[#568B75] dark:text-[#75B798]" />
           </div>
-          <p className="text-2xl sm:text-3xl font-extrabold text-indigo-600 dark:text-indigo-400 mt-1">
+          <p className="text-2xl sm:text-3xl font-extrabold text-[#568B75] dark:text-[#75B798] mt-1">
             {consistencyPct}%
           </p>
         </div>
 
-        <div className="bg-white dark:bg-[#111827] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-4.5 shadow-card">
+        <div className="glass-card p-4.5 rounded-2xl">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
               Monitored Rituals
             </span>
-            <Sparkles className="w-5 h-5 text-emerald-500" />
+            <Sparkles className="w-5 h-5 text-[#4D9673] dark:text-[#75C69A]" />
           </div>
-          <p className="text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">
+          <p className="text-2xl sm:text-3xl font-extrabold text-[#4D9673] dark:text-[#75C69A] mt-1">
             {habits.length}
           </p>
         </div>
@@ -331,19 +331,19 @@ export function Habits() {
               <div
                 key={habit.id}
                 onClick={() => setSelectedHabitId(habit.id)}
-                className="p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all hover:border-indigo-300 dark:hover:border-indigo-800/80 hover:bg-white dark:hover:bg-slate-900/70 cursor-pointer group"
+                className="p-4 rounded-2xl glass-card glass-card-hover flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all cursor-pointer group"
               >
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h4 className="font-bold text-sm text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                    <h4 className="font-bold text-sm text-slate-900 dark:text-white group-hover:text-[#568B75] dark:group-hover:text-[#75B798] transition-colors">
                       {habit.name}
                     </h4>
-                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200/50 dark:border-indigo-800/50">
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-[#568B75]/15 dark:bg-[#75B798]/20 text-[#568B75] dark:text-[#75B798] border border-[#568B75]/30 dark:border-[#75B798]/30">
                       {habit.target}
                     </span>
                   </div>
-                  <div className="flex items-center gap-1.5 mt-1 text-xs text-amber-600 dark:text-amber-400 font-semibold">
-                    <Flame className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+                  <div className="flex items-center gap-1.5 mt-1 text-xs text-[#D69A50] dark:text-[#E8B76C] font-semibold">
+                    <Flame className="w-3.5 h-3.5 fill-[#D69A50] text-[#D69A50]" />
                     <span>{calculateHabitStreak(habit.completedDates, habit.baseStreak || habit.streak || 0)} day streak</span>
                   </div>
                 </div>
@@ -365,7 +365,7 @@ export function Habits() {
                             <span
                               className={`text-[10px] font-mono leading-tight ${
                                 day.isToday
-                                  ? 'font-bold text-indigo-600 dark:text-indigo-400'
+                                  ? 'font-bold text-[#568B75] dark:text-[#75B798]'
                                   : 'text-slate-400 dark:text-slate-500'
                               }`}
                             >
@@ -374,7 +374,7 @@ export function Habits() {
                             <span
                               className={`text-[9px] font-semibold leading-tight ${
                                 day.isToday
-                                  ? 'px-1 rounded bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 font-bold'
+                                  ? 'px-1 rounded bg-[#568B75]/20 dark:bg-[#75B798]/20 text-[#568B75] dark:text-[#75B798] font-bold'
                                   : 'text-slate-400 dark:text-slate-500'
                               }`}
                             >
@@ -385,14 +385,14 @@ export function Habits() {
                           <button
                             type="button"
                             onClick={() => toggleDateCheck(habit.id, day.dateStr)}
-                            className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center transition-all cursor-pointer ${
+                            className={`w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center transition-all cursor-pointer ${
                               isDone
-                                ? 'bg-emerald-500 text-white shadow-xs border border-emerald-500 hover:bg-emerald-600 active:scale-95'
+                                ? 'bg-[#568B75] dark:bg-[#75B798] text-white dark:text-[#101C18] shadow-xs border border-[#568B75] dark:border-[#75B798] hover:brightness-105 active:scale-95'
                                 : isMissed
-                                ? 'bg-rose-50 dark:bg-rose-950/40 text-rose-500 dark:text-rose-400 border border-rose-200 dark:border-rose-900/60 hover:bg-rose-100 dark:hover:bg-rose-900/50 shadow-xs'
+                                ? 'bg-[#DC6B6B]/15 text-[#DC6B6B] dark:text-[#F08080] border border-[#DC6B6B]/30 dark:border-[#F08080]/30 hover:bg-[#DC6B6B]/25 shadow-xs'
                                 : isTodayPending
-                                ? 'bg-white dark:bg-slate-800 border-2 border-indigo-500 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 shadow-sm ring-2 ring-indigo-500/20'
-                                : 'bg-slate-50/70 dark:bg-slate-800/40 border border-dashed border-slate-200 dark:border-slate-800 text-slate-300 dark:text-slate-600 hover:border-slate-400 dark:hover:border-slate-600'
+                                ? 'bg-white/60 dark:bg-white/10 border-2 border-[#568B75] dark:border-[#75B798] text-[#568B75] dark:text-[#75B798] hover:bg-[#568B75]/10 shadow-sm ring-2 ring-[#568B75]/20'
+                                : 'bg-white/30 dark:bg-white/5 border border-dashed border-white/60 dark:border-white/10 text-slate-300 dark:text-slate-600 hover:border-[#568B75]/50'
                             }`}
                             title={isDone ? 'Completed' : isMissed ? 'Missed' : day.isToday ? 'Today' : 'Upcoming'}
                           >
@@ -401,7 +401,7 @@ export function Habits() {
                             ) : isMissed ? (
                               <X className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[3]" />
                             ) : isTodayPending ? (
-                              <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
+                              <span className="w-2 h-2 rounded-full bg-[#568B75] dark:bg-[#75B798] animate-pulse" />
                             ) : (
                               <span className="text-[10px] font-bold text-slate-300 dark:text-slate-600">•</span>
                             )}

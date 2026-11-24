@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
+import { AuthProvider } from './context/AuthContext';
 import { AppProvider } from './context/AppContext';
 import { Layout } from './components/layout/Layout';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
@@ -31,26 +32,30 @@ export default function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider>
-        <AppProvider>
-          <BrowserRouter>
-            <Suspense fallback={<PageLoadingFallback />}>
-              <Routes>
-                <Route path="/" element={<Layout />}>
-                  <Route index element={<Dashboard />} />
-                  <Route path="tasks" element={<MyTasks />} />
-                  <Route path="goals" element={<Goals />} />
-                  <Route path="planner" element={<DailyPlanner />} />
-                  <Route path="calendar" element={<Calendar />} />
-                  <Route path="habits" element={<Habits />} />
-                  <Route path="focus" element={<FocusMode />} />
-                  <Route path="analytics" element={<Analytics />} />
-                  <Route path="recommendations" element={<Recommendations />} />
-                  <Route path="*" element={<Navigate to="/" replace />} />
-                </Route>
-              </Routes>
-            </Suspense>
-          </BrowserRouter>
-        </AppProvider>
+        <AuthProvider>
+          <AppProvider>
+            <BrowserRouter>
+              <Suspense fallback={<PageLoadingFallback />}>
+                <Routes>
+                  <Route path="/login" element={<Navigate to="/" replace />} />
+                  <Route path="/register" element={<Navigate to="/" replace />} />
+                  <Route path="/" element={<Layout />}>
+                    <Route index element={<Dashboard />} />
+                    <Route path="tasks" element={<MyTasks />} />
+                    <Route path="goals" element={<Goals />} />
+                    <Route path="planner" element={<DailyPlanner />} />
+                    <Route path="calendar" element={<Calendar />} />
+                    <Route path="habits" element={<Habits />} />
+                    <Route path="focus" element={<FocusMode />} />
+                    <Route path="analytics" element={<Analytics />} />
+                    <Route path="recommendations" element={<Recommendations />} />
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                  </Route>
+                </Routes>
+              </Suspense>
+            </BrowserRouter>
+          </AppProvider>
+        </AuthProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );

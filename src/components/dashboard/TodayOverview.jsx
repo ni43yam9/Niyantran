@@ -44,7 +44,7 @@ export function TodayOverview() {
             action={
               <Link
                 to="/tasks"
-                className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 flex items-center gap-1 transition-colors"
+                className="text-xs font-semibold text-[#568B75] dark:text-[#75B798] hover:text-[#467360] dark:hover:text-[#A3D9B1] flex items-center gap-1 transition-colors"
               >
                 <span>View All Tasks</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -53,12 +53,12 @@ export function TodayOverview() {
           />
 
           {/* Today's Progress Bar Banner */}
-          <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 mb-4 space-y-2">
+          <div className="p-4 rounded-2xl glass-card mb-4 space-y-2">
             <div className="flex items-center justify-between text-xs font-semibold">
               <span className="text-slate-700 dark:text-slate-300">
                 Daily Completion Progress
               </span>
-              <span className="text-indigo-600 dark:text-indigo-400">
+              <span className="text-[#568B75] dark:text-[#75B798]">
                 {completedToday} of {todayTasks.length} Completed ({progressPercent}%)
               </span>
             </div>
@@ -73,7 +73,7 @@ export function TodayOverview() {
           <div className="space-y-2.5 flex-1">
             {todayTasks.length === 0 ? (
               <div className="text-center py-8 text-slate-400">
-                <CheckCircle2 className="w-8 h-8 mx-auto mb-2 text-emerald-500 opacity-60" />
+                <CheckCircle2 className="w-8 h-8 mx-auto mb-2 text-[#568B75] opacity-60" />
                 <p className="text-sm font-medium">All tasks for today are completed!</p>
               </div>
             ) : (
@@ -84,10 +84,10 @@ export function TodayOverview() {
                 return (
                   <div
                     key={task.id}
-                    className={`group flex items-start justify-between gap-3 p-3 rounded-xl border transition-all duration-150 ${
+                    className={`group flex items-start justify-between gap-3 p-3 rounded-2xl transition-all duration-200 ${
                       isCompleted
-                        ? 'bg-slate-50/60 dark:bg-slate-900/30 border-slate-200/60 dark:border-slate-850 opacity-75'
-                        : 'bg-white dark:bg-[#161F30] border-slate-200/90 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-indigo-800 hover:shadow-subtle'
+                        ? 'glass-card border-[#568B75]/30 opacity-75'
+                        : 'glass-card glass-card-hover'
                     }`}
                   >
                     <div className="flex items-start gap-3 min-w-0 flex-1">
@@ -95,11 +95,11 @@ export function TodayOverview() {
                       <button
                         type="button"
                         onClick={() => toggleTaskCompletion(task.id)}
-                        className="mt-0.5 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors shrink-0 cursor-pointer"
+                        className="mt-0.5 text-slate-400 hover:text-[#568B75] dark:hover:text-[#75B798] transition-colors shrink-0 cursor-pointer"
                         aria-label={isCompleted ? 'Mark pending' : 'Mark completed'}
                       >
                         {isCompleted ? (
-                          <CheckCircle2 className="w-5 h-5 text-emerald-500 fill-emerald-50 dark:fill-emerald-950" />
+                          <CheckCircle2 className="w-5 h-5 text-[#568B75] dark:text-[#75B798] fill-[#568B75]/20 dark:fill-[#75B798]/20" />
                         ) : (
                           <Circle className="w-5 h-5" />
                         )}

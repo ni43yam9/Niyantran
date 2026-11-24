@@ -8,10 +8,10 @@ export function Card({
   return (
     <div
       onClick={onClick}
-      className={`bg-white dark:bg-[#131B2E] border border-slate-200/90 dark:border-slate-800/80 rounded-xl transition-all duration-200 ${
+      className={`glass-card ${
         hover
-          ? 'hover:border-slate-300 dark:hover:border-slate-700/80 hover:shadow-card-hover'
-          : 'shadow-card'
+          ? 'glass-card-hover cursor-pointer'
+          : ''
       } ${padding} ${className}`}
     >
       {children}
@@ -28,11 +28,11 @@ export function CardHeader({
 }) {
   return (
     <div
-      className={`flex items-start justify-between gap-3 mb-4 pb-1 border-b border-slate-100 dark:border-slate-800/60 ${className}`}
+      className={`flex items-start justify-between gap-3 mb-4 pb-2 border-b border-white/60 dark:border-white/10 ${className}`}
     >
       <div className="flex items-center gap-2.5 min-w-0">
         {Icon && (
-          <div className="p-2 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 shrink-0">
+          <div className="p-2 rounded-xl bg-sage-primary/10 dark:bg-forest-primary/15 text-sage-primary dark:text-forest-primary shrink-0">
             <Icon className="w-4 h-4" />
           </div>
         )}

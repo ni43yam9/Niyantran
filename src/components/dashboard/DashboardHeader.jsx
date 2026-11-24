@@ -27,12 +27,18 @@ export function DashboardHeader() {
   ];
 
   return (
-    <div className="bg-gradient-to-r from-white via-indigo-50/20 to-white dark:from-[#111827] dark:via-indigo-950/20 dark:to-[#111827] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-card transition-all">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="glass-silver-gradient backdrop-blur-xl rounded-2xl p-5 sm:p-6 transition-all relative overflow-hidden group">
+      {/* Decorative ambient silver-emerald shimmer blobs for high contrast */}
+      <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-gradient-to-br from-[#568B75]/25 dark:from-[#75B798]/20 to-transparent blur-2xl pointer-events-none" />
+      <div className="absolute -bottom-10 -left-10 w-44 h-44 rounded-full bg-gradient-to-tr from-slate-200/50 dark:from-white/10 to-transparent blur-2xl pointer-events-none" />
+
+      <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1.5 min-w-0">
-          <div className="flex items-center gap-2 text-xs font-semibold text-indigo-600 dark:text-indigo-400">
-            <CalendarIcon className="w-3.5 h-3.5" />
-            <span>{formattedDate}</span>
+          <div className="flex items-center gap-2 text-xs font-semibold text-[#568B75] dark:text-[#75B798]">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/70 dark:bg-white/10 border border-slate-200/70 dark:border-white/10 shadow-2xs">
+              <CalendarIcon className="w-3.5 h-3.5" />
+              <span>{formattedDate}</span>
+            </span>
             <span className="text-slate-300 dark:text-slate-700">•</span>
             <span className="flex items-center gap-1 text-slate-500 dark:text-slate-400">
               <Clock className="w-3 h-3" />
@@ -41,7 +47,7 @@ export function DashboardHeader() {
           </div>
 
           <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-            {getGreeting()}, <span className="text-indigo-600 dark:text-indigo-400">{user.name}</span>
+            {getGreeting()}, <span className="text-[#568B75] dark:text-[#75B798]">{user.name}</span>
           </h2>
 
           <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 italic max-w-2xl flex items-start gap-1.5 pt-1">
@@ -57,7 +63,7 @@ export function DashboardHeader() {
             size="md"
             icon={Plus}
             onClick={() => openAddTaskModal()}
-            className="w-full sm:w-auto shadow-md shadow-indigo-500/20"
+            className="w-full sm:w-auto shadow-md shadow-[#568B75]/25 dark:shadow-[#75B798]/25"
           >
             Quick Add Task
           </Button>

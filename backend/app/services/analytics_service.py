@@ -49,7 +49,7 @@ def get_analytics_overview(db: Session, tz_offset_mins: int = 0) -> AnalyticsOve
     # Completion rates across timeframes
     # Daily
     today_due = sum(1 for t in tasks if t.due_date == today or (t.completed_at and t.completed_at.date() == today))
-    today_done = sum(1 for t in completed_tasks if t.completed_at and t.completed_at.date() == today)
+    today_done = sum(1 for t in completed_tasks if (t.completed_at and t.completed_at.date() == today) or (t.due_date == today and t.status == "Completed"))
     daily_rate = round((today_done / today_due) * 100, 1) if today_due > 0 else (100.0 if today_done > 0 else 0.0)
 
     # Weekly
@@ -112,7 +112,14 @@ def get_daily_analytics(db: Session, target_date: Optional[date] = None, tz_offs
     tasks_completed = 0
     tasks = db.query(Task).filter(Task.status == "Completed").all()
     for t in tasks:
-        if t.completed_at and (t.completed_at + timedelta(minutes=tz_offset_mins)).date() == ref_date:
+        is_comp = False
+        if t.completed_at:
+            comp_date = (t.completed_at + timedelta(minutes=tz_offset_mins)).date()
+            if comp_date == ref_date:
+                is_comp = True
+        if not is_comp and t.due_date == ref_date and t.status == "Completed":
+            is_comp = True
+        if is_comp:
             tasks_completed += 1
 
     postponed = db.query(func.count(ActivityLog.id)).filter(

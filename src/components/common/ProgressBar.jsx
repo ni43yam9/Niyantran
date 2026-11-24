@@ -15,11 +15,11 @@ export function ProgressBar({
   };
 
   const colorStyles = {
-    indigo: 'bg-indigo-600 dark:bg-indigo-500',
-    emerald: 'bg-emerald-500 dark:bg-emerald-400',
-    amber: 'bg-amber-500 dark:bg-amber-400',
-    rose: 'bg-rose-500 dark:bg-rose-400',
-    blue: 'bg-blue-600 dark:bg-blue-500',
+    indigo: 'bg-[#568B75] dark:bg-[#75B798]',
+    emerald: 'bg-[#4D9673] dark:bg-[#75C69A]',
+    amber: 'bg-[#D69A50] dark:bg-[#E8B76C]',
+    rose: 'bg-[#DC6B6B] dark:bg-[#F08080]',
+    blue: 'bg-[#7295B5] dark:bg-[#82B4D8]',
   };
 
   return (
@@ -33,12 +33,12 @@ export function ProgressBar({
         </div>
       )}
       <div
-        className={`w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden ${
+        className={`w-full bg-white/50 dark:bg-white/10 rounded-full overflow-hidden border border-white/60 dark:border-white/10 ${
           sizeStyles[size] || sizeStyles.md
         }`}
       >
         <div
-          className={`h-full rounded-full transition-all duration-500 ease-out ${
+          className={`h-full rounded-full transition-all duration-500 ease-out shadow-xs ${
             colorStyles[color] || colorStyles.indigo
           }`}
           style={{ width: `${percentage}%` }}

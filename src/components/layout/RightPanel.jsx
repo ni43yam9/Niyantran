@@ -54,11 +54,11 @@ export function RightPanel({ onClose }) {
   };
 
   return (
-    <aside className="w-80 shrink-0 border-l border-slate-200 dark:border-slate-800/80 bg-white/80 dark:bg-[#111827]/80 backdrop-blur-sm p-5 space-y-6 overflow-y-auto h-screen sticky top-0 hidden xl:block select-none">
+    <aside className="w-80 shrink-0 glass-sidebar border-l border-r-0 border-white/60 dark:border-white/10 p-5 space-y-6 overflow-y-auto h-screen sticky top-0 hidden xl:block select-none">
       {/* Panel Header */}
-      <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800/80">
+      <div className="flex items-center justify-between pb-3 border-b border-white/60 dark:border-white/10">
         <div className="flex items-center gap-2">
-          <CalendarIcon className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+          <CalendarIcon className="w-4 h-4 text-[#568B75] dark:text-[#75B798]" />
           <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
             Agenda & Priorities
           </h2>
@@ -67,7 +67,7 @@ export function RightPanel({ onClose }) {
           <button
             type="button"
             onClick={onClose}
-            className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+            className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-white/40 dark:hover:bg-white/10 transition-colors"
             title="Hide right panel"
           >
             <X className="w-4 h-4" />
@@ -76,7 +76,7 @@ export function RightPanel({ onClose }) {
       </div>
 
       {/* 1. Mini Calendar */}
-      <div className="bg-slate-50/80 dark:bg-slate-900/50 border border-slate-200/80 dark:border-slate-800 rounded-xl p-3.5 shadow-2xs">
+      <div className="glass-card p-3.5">
         <div className="flex items-center justify-between mb-3">
           <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
             {monthNames[month]} {year}
@@ -122,8 +122,8 @@ export function RightPanel({ onClose }) {
                 type="button"
                 className={`h-7 w-7 mx-auto rounded-lg flex flex-col items-center justify-center font-medium transition-all text-xs relative ${
                   today
-                    ? 'bg-indigo-600 text-white font-bold shadow-xs'
-                    : 'text-slate-700 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800'
+                    ? 'bg-[#568B75] dark:bg-[#75B798] text-white dark:text-[#101C18] font-bold shadow-xs'
+                    : 'text-slate-700 dark:text-slate-300 hover:bg-white/40 dark:hover:bg-white/10'
                 }`}
               >
                 <span>{d}</span>
@@ -140,7 +140,7 @@ export function RightPanel({ onClose }) {
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
-            <Clock className="w-3.5 h-3.5 text-rose-500" />
+            <Clock className="w-3.5 h-3.5 text-[#DC6B6B] dark:text-[#F08080]" />
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
               Upcoming Deadlines
             </h3>
@@ -156,8 +156,8 @@ export function RightPanel({ onClose }) {
               key={item.id}
               className={`p-2.5 rounded-xl border text-xs transition-colors ${
                 item.isOverdue
-                  ? 'bg-rose-50/50 dark:bg-rose-950/20 border-rose-200 dark:border-rose-900/40'
-                  : 'bg-white dark:bg-slate-900/60 border-slate-200/80 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
+                  ? 'bg-[#DC6B6B]/15 border-[#DC6B6B]/30 text-slate-800 dark:text-slate-200'
+                  : 'glass-card'
               }`}
             >
               <div className="flex items-start justify-between gap-2">

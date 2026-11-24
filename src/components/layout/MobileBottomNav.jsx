@@ -42,15 +42,15 @@ export function MobileBottomNav() {
             className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity"
             onClick={() => setIsMoreOpen(false)}
           />
-          <div className="relative bg-white dark:bg-[#111827] rounded-t-2xl border-t border-slate-200 dark:border-slate-800 p-5 shadow-2xl z-50 animate-in slide-in-from-bottom duration-200">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+          <div className="relative glass-modal rounded-t-3xl border-t border-white/60 dark:border-white/10 p-5 shadow-2xl z-50 animate-in slide-in-from-bottom duration-200">
+            <div className="flex items-center justify-between pb-3 border-b border-white/50 dark:border-white/10">
               <span className="font-semibold text-sm text-slate-900 dark:text-slate-100">
                 Additional Modules
               </span>
               <button
                 type="button"
                 onClick={() => setIsMoreOpen(false)}
-                className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                className="p-1.5 rounded-lg text-slate-400 hover:bg-white/40 dark:hover:bg-white/10"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -64,14 +64,14 @@ export function MobileBottomNav() {
                     to={item.path}
                     onClick={() => setIsMoreOpen(false)}
                     className={({ isActive }) =>
-                      `flex items-center gap-3 p-3 rounded-xl border text-sm font-medium transition-colors ${
+                      `flex items-center gap-3 p-3 rounded-2xl text-sm font-medium transition-colors ${
                         isActive
-                          ? 'border-indigo-600/40 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300'
-                          : 'border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                          ? 'glass-nav-active font-semibold'
+                          : 'glass-card text-slate-700 dark:text-slate-300'
                       }`
                     }
                   >
-                    <Icon className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
+                    <Icon className="w-4 h-4 text-[#568B75] dark:text-[#75B798] shrink-0" />
                     <span>{item.label}</span>
                   </NavLink>
                 );
@@ -82,7 +82,7 @@ export function MobileBottomNav() {
       )}
 
       {/* Persistent Bottom Bar */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/95 dark:bg-[#111827]/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 px-2 py-1 flex items-center justify-around select-none">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-30 glass-header border-t border-white/60 dark:border-white/10 px-2 py-1 flex items-center justify-around select-none">
         {mainTabs.map((tab) => {
           const Icon = tab.icon;
           return (
@@ -93,7 +93,7 @@ export function MobileBottomNav() {
               className={({ isActive }) =>
                 `flex flex-col items-center justify-center flex-1 py-1.5 px-1 rounded-xl text-[10px] font-medium transition-all relative ${
                   isActive
-                    ? 'text-indigo-600 dark:text-indigo-400 font-semibold'
+                    ? 'text-[#568B75] dark:text-[#75B798] font-bold'
                     : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                 }`
               }

@@ -35,12 +35,12 @@ export function Input({
           onChange={onChange}
           required={required}
           placeholder={placeholder}
-          className={`block w-full rounded-lg border bg-white dark:bg-slate-900/80 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors ${
+          className={`block w-full rounded-xl border bg-white/60 dark:bg-white/5 backdrop-blur-md text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${
             Icon ? 'pl-9 pr-3 py-2' : 'px-3 py-2'
           } ${
             error
               ? 'border-rose-300 dark:border-rose-800 text-rose-900 focus:ring-rose-500'
-              : 'border-slate-300 dark:border-slate-700'
+              : 'border-white/60 dark:border-white/10'
           }`}
           {...props}
         />
@@ -83,10 +83,10 @@ export function Textarea({
         onChange={onChange}
         required={required}
         placeholder={placeholder}
-        className={`block w-full rounded-lg border bg-white dark:bg-slate-900/80 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors px-3 py-2 ${
+        className={`block w-full rounded-xl border bg-white/60 dark:bg-white/5 backdrop-blur-md text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors px-3 py-2 ${
           error
             ? 'border-rose-300 dark:border-rose-800 text-rose-900'
-            : 'border-slate-300 dark:border-slate-700'
+            : 'border-white/60 dark:border-white/10'
         }`}
         {...props}
       />
@@ -126,20 +126,20 @@ export function Select({
         value={value}
         onChange={onChange}
         required={required}
-        className={`block w-full rounded-lg border bg-white dark:bg-slate-900/80 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors px-3 py-2 cursor-pointer ${
+        className={`block w-full rounded-xl border bg-white/60 dark:bg-white/5 backdrop-blur-md text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors px-3 py-2 cursor-pointer ${
           error
             ? 'border-rose-300 dark:border-rose-800 text-rose-900'
-            : 'border-slate-300 dark:border-slate-700'
+            : 'border-white/60 dark:border-white/10'
         }`}
         {...props}
       >
         {placeholder && (
-          <option value="" disabled>
+          <option value="" disabled className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
             {placeholder}
           </option>
         )}
         {options.map((opt) => (
-          <option key={opt.value || opt.id || opt} value={opt.value || opt.id || opt}>
+          <option key={opt.value || opt.id || opt} value={opt.value || opt.id || opt} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
             {opt.label || opt.name || opt}
           </option>
         ))}

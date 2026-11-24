@@ -13,13 +13,29 @@ import { taskService } from '../services/taskService';
 import { goalService } from '../services/goalService';
 import { habitService } from '../services/habitService';
 import { migrationService } from '../services/migrationService';
+import {
+  taskRepository,
+  goalRepository,
+  habitRepository,
+  activityRepository,
+} from '../database';
+import { migrateLocalStorageToIndexedDB } from '../database/migrations';
+import {
+  syncManager,
+  initSyncTriggers,
+  teardownSyncTriggers,
+} from '../sync';
+import {
+  evaluateImportantDeadlines,
+  checkAndDispatchDeadlineNotifications,
+} from '../services/notificationService';
 
 const AppContext = createContext();
 
 export function AppProvider({ children }) {
   const [user] = useState(INITIAL_USER);
 
-  // 1. Data Persistence: Load tasks and goals from localStorage if available
+  // 1. Data Persistence: Load tasks, goals, habits from localStorage initially for instantaneous first paint
   const [tasks, setTasks] = useState(() => {
     try {
       const saved = localStorage.getItem('niyantra_tasks');
@@ -55,7 +71,7 @@ export function AppProvider({ children }) {
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncError, setSyncError] = useState(null);
 
-  // Sync to localStorage whenever tasks, goals or habits change (acts as persistent offline cache)
+  // Sync to localStorage whenever tasks, goals or habits change (acts as persistent secondary cache)
   useEffect(() => {
     try {
       localStorage.setItem('niyantra_tasks', JSON.stringify(tasks));
@@ -80,20 +96,99 @@ export function AppProvider({ children }) {
     }
   }, [habits]);
 
-  // Synchronize with backend API
+  // IndexedDB Startup Initialization & Migration
+  useEffect(() => {
+    let active = true;
+    async function initClientStorage() {
+      try {
+        // Step 1: Execute localStorage -> IndexedDB migration if not yet done
+        await migrateLocalStorageToIndexedDB();
+
+        // Step 2: Load fresh data from IndexedDB
+        const [idbTasks, idbGoals, idbHabits] = await Promise.all([
+          taskRepository.getAll(),
+          goalRepository.getAll(),
+          habitRepository.getAll(),
+        ]);
+
+        if (!active) return;
+
+        if (idbTasks && idbTasks.length > 0) {
+          setTasks(idbTasks);
+        } else if (tasks.length > 0) {
+          await taskRepository.bulkUpsert(tasks);
+        }
+
+        if (idbGoals && idbGoals.length > 0) {
+          setGoals(idbGoals);
+        } else if (goals.length > 0) {
+          await goalRepository.bulkUpsert(goals);
+        }
+
+        if (idbHabits && idbHabits.length > 0) {
+          setHabits(idbHabits);
+        } else if (habits.length > 0) {
+          await habitRepository.bulkUpsert(habits);
+        }
+      } catch (err) {
+        console.warn('IndexedDB initialization notice:', err);
+      }
+    }
+
+    void initClientStorage();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  // Automatic multi-device sync triggers and state listener
+  useEffect(() => {
+    initSyncTriggers({ intervalMs: 30000, initialSync: true });
+
+    const unsubscribe = syncManager.onSyncComplete(async () => {
+      try {
+        const [freshTasks, freshGoals, freshHabits] = await Promise.all([
+          taskRepository.getAll(),
+          goalRepository.getAll(),
+          habitRepository.getAll(),
+        ]);
+        if (freshTasks) setTasks(freshTasks);
+        if (freshGoals) setGoals(freshGoals);
+        if (freshHabits) setHabits(freshHabits);
+      } catch (err) {
+        console.warn('Error reloading state after synchronization:', err);
+      }
+    });
+
+    return () => {
+      unsubscribe();
+      teardownSyncTriggers();
+    };
+  }, []);
+
+  // Synchronize with backend API (Phase 10G Multi-Device Sync)
   const syncWithBackend = useCallback(async () => {
     setIsSyncing(true);
     setSyncError(null);
 
     try {
-      const health = await api.checkHealth();
-      if (!health.online) {
-        setIsBackendOnline(false);
-        setIsSyncing(false);
+      if (syncManager.isAuthenticated()) {
+        const result = await syncManager.sync();
+        setIsBackendOnline(result.status !== 'error');
+        const [freshTasks, freshGoals, freshHabits] = await Promise.all([
+          taskRepository.getAll(),
+          goalRepository.getAll(),
+          habitRepository.getAll(),
+        ]);
+        if (freshTasks) setTasks(freshTasks);
+        if (freshGoals) setGoals(freshGoals);
+        if (freshHabits) setHabits(freshHabits);
         return;
       }
 
-      setIsBackendOnline(true);
+      // Guest / Offline fallback
+      const health = await api.checkHealth();
+      setIsBackendOnline(health.online);
 
       // Perform automated migration of existing local records to SQLite if needed
       const migrationV3Done = localStorage.getItem('niyantra_migrated_v3_habits_timeblocks');
@@ -132,12 +227,15 @@ export function AppProvider({ children }) {
 
       if (Array.isArray(backendTasks) && backendTasks.length > 0) {
         setTasks(backendTasks);
+        await taskRepository.bulkUpsert(backendTasks);
       }
       if (Array.isArray(backendGoals) && backendGoals.length > 0) {
         setGoals(backendGoals);
+        await goalRepository.bulkUpsert(backendGoals);
       }
       if (Array.isArray(backendHabits) && backendHabits.length > 0) {
         setHabits(backendHabits);
+        await habitRepository.bulkUpsert(backendHabits);
       }
     } catch (err) {
       console.warn('Backend sync failed, continuing in offline mode:', err);
@@ -165,6 +263,7 @@ export function AppProvider({ children }) {
   // Modal & layout states
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [editingGoal, setEditingGoal] = useState(null);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -208,6 +307,20 @@ export function AppProvider({ children }) {
         priority: t.priority,
       }));
   }, [tasks]);
+
+  // Dynamic Deadline Notifications derived from tasks and goals
+  const deadlineNotifications = useMemo(() => {
+    return evaluateImportantDeadlines(tasks, goals);
+  }, [tasks, goals]);
+
+  // Dynamic Deadline Notifications Monitoring: periodically evaluates and notifies user
+  useEffect(() => {
+    checkAndDispatchDeadlineNotifications(tasks, goals);
+    const interval = setInterval(() => {
+      checkAndDispatchDeadlineNotifications(tasks, goals);
+    }, 10 * 60 * 1000); // Check every 10 minutes
+    return () => clearInterval(interval);
+  }, [tasks, goals]);
 
   // 4. Dynamic Top Priorities derived from high-priority pending tasks
   const topPriorities = useMemo(() => {
@@ -298,7 +411,20 @@ export function AppProvider({ children }) {
     setTasks((prev) => [taskWithId, ...prev]);
     closeAddTaskModal();
 
-    // Async backend synchronization
+    // Persist to IndexedDB
+    try {
+      await taskRepository.createTask(taskWithId);
+      await activityRepository.log({
+        eventType: 'TASK_CREATED',
+        entityType: 'task',
+        entityId: taskWithId.id,
+        details: { title: taskWithId.title, priority: taskWithId.priority },
+      });
+    } catch (e) {
+      console.warn('Failed saving task to IndexedDB:', e);
+    }
+
+    // Async backend synchronization if connected
     if (isBackendOnline) {
       try {
         const created = await taskService.createTask(taskWithId);
@@ -316,6 +442,19 @@ export function AppProvider({ children }) {
     );
     closeAddTaskModal();
 
+    // Persist to IndexedDB
+    try {
+      await taskRepository.updateTask(updatedTask.id, updatedTask);
+      await activityRepository.log({
+        eventType: 'TASK_UPDATED',
+        entityType: 'task',
+        entityId: updatedTask.id,
+        details: { title: updatedTask.title, status: updatedTask.status },
+      });
+    } catch (e) {
+      console.warn('Failed updating task in IndexedDB:', e);
+    }
+
     // Async backend synchronization
     if (isBackendOnline) {
       try {
@@ -330,6 +469,18 @@ export function AppProvider({ children }) {
   const deleteTask = async (taskId) => {
     // Optimistic local update
     setTasks((prev) => prev.filter((t) => t.id !== taskId));
+
+    // Persist to IndexedDB
+    try {
+      await taskRepository.deleteTask(taskId);
+      await activityRepository.log({
+        eventType: 'TASK_DELETED',
+        entityType: 'task',
+        entityId: taskId,
+      });
+    } catch (e) {
+      console.warn('Failed deleting task from IndexedDB:', e);
+    }
 
     // Async backend synchronization
     if (isBackendOnline) {
@@ -358,6 +509,18 @@ export function AppProvider({ children }) {
       })
     );
 
+    // Persist to IndexedDB
+    try {
+      await taskRepository.toggleCompletion(taskId);
+      await activityRepository.log({
+        eventType: nextStatus === 'Completed' ? 'TASK_COMPLETED' : 'TASK_REOPENED',
+        entityType: 'task',
+        entityId: taskId,
+      });
+    } catch (e) {
+      console.warn('Failed toggling task in IndexedDB:', e);
+    }
+
     // Async backend synchronization
     if (isBackendOnline) {
       try {
@@ -383,6 +546,9 @@ export function AppProvider({ children }) {
     setIsGoalModalOpen(false);
   };
 
+  const openNotificationCenter = () => setIsNotificationOpen(true);
+  const closeNotificationCenter = () => setIsNotificationOpen(false);
+
   const addGoal = async (newGoal) => {
     const goalWithId = {
       ...newGoal,
@@ -395,6 +561,19 @@ export function AppProvider({ children }) {
     // Optimistic local update
     setGoals((prev) => [goalWithId, ...prev]);
     closeAddGoalModal();
+
+    // Persist to IndexedDB
+    try {
+      await goalRepository.createGoal(goalWithId);
+      await activityRepository.log({
+        eventType: 'GOAL_CREATED',
+        entityType: 'goal',
+        entityId: goalWithId.id,
+        details: { title: goalWithId.title },
+      });
+    } catch (e) {
+      console.warn('Failed creating goal in IndexedDB:', e);
+    }
 
     // Async backend synchronization
     if (isBackendOnline) {
@@ -414,6 +593,19 @@ export function AppProvider({ children }) {
     );
     closeAddGoalModal();
 
+    // Persist to IndexedDB
+    try {
+      await goalRepository.updateGoal(updatedGoal.id, updatedGoal);
+      await activityRepository.log({
+        eventType: 'GOAL_UPDATED',
+        entityType: 'goal',
+        entityId: updatedGoal.id,
+        details: { title: updatedGoal.title, progress: updatedGoal.progress },
+      });
+    } catch (e) {
+      console.warn('Failed updating goal in IndexedDB:', e);
+    }
+
     // Async backend synchronization
     if (isBackendOnline) {
       try {
@@ -428,6 +620,18 @@ export function AppProvider({ children }) {
   const deleteGoal = async (goalId) => {
     // Optimistic local update
     setGoals((prev) => prev.filter((g) => g.id !== goalId));
+
+    // Persist to IndexedDB
+    try {
+      await goalRepository.deleteGoal(goalId);
+      await activityRepository.log({
+        eventType: 'GOAL_DELETED',
+        entityType: 'goal',
+        entityId: goalId,
+      });
+    } catch (e) {
+      console.warn('Failed deleting goal in IndexedDB:', e);
+    }
 
     // Async backend synchronization
     if (isBackendOnline) {
@@ -460,6 +664,19 @@ export function AppProvider({ children }) {
       })
     );
 
+    // Persist to IndexedDB
+    try {
+      await habitRepository.toggleLog(habitId, dateStr, explicitCompleted);
+      await activityRepository.log({
+        eventType: 'HABIT_TOGGLED',
+        entityType: 'habit',
+        entityId: habitId,
+        details: { date: dateStr, completed: explicitCompleted },
+      });
+    } catch (e) {
+      console.warn('Failed toggling habit in IndexedDB:', e);
+    }
+
     // Async backend synchronization
     if (isBackendOnline) {
       try {
@@ -482,6 +699,19 @@ export function AppProvider({ children }) {
     };
     setHabits((prev) => [habitWithId, ...prev]);
 
+    // Persist to IndexedDB
+    try {
+      await habitRepository.createHabit(habitWithId);
+      await activityRepository.log({
+        eventType: 'HABIT_CREATED',
+        entityType: 'habit',
+        entityId: habitWithId.id,
+        details: { name: habitWithId.name },
+      });
+    } catch (e) {
+      console.warn('Failed creating habit in IndexedDB:', e);
+    }
+
     if (isBackendOnline) {
       try {
         const created = await habitService.createHabit(habitWithId);
@@ -494,6 +724,19 @@ export function AppProvider({ children }) {
 
   const deleteHabit = async (habitId) => {
     setHabits((prev) => prev.filter((h) => h.id !== habitId));
+
+    // Persist to IndexedDB
+    try {
+      await habitRepository.deleteHabit(habitId);
+      await activityRepository.log({
+        eventType: 'HABIT_DELETED',
+        entityType: 'habit',
+        entityId: habitId,
+      });
+    } catch (e) {
+      console.warn('Failed deleting habit in IndexedDB:', e);
+    }
+
     if (isBackendOnline) {
       try {
         await habitService.deleteHabit(habitId);
@@ -531,6 +774,13 @@ export function AppProvider({ children }) {
         openAddGoalModal,
         closeAddGoalModal,
         editingGoal,
+        // Notification states & actions
+        isNotificationOpen,
+        setIsNotificationOpen,
+        openNotificationCenter,
+        closeNotificationCenter,
+        deadlineNotifications,
+        unreadNotificationCount: deadlineNotifications.length,
         // Layout states
         isSidebarCollapsed,
         setIsSidebarCollapsed,

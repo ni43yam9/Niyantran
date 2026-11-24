@@ -28,21 +28,21 @@ export function Calendar() {
         {/* Main Month Grid */}
         <div className="flex-1">
           <Card>
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+            <div className="flex items-center justify-between pb-4 border-b border-white/60 dark:border-white/10">
               <div className="flex items-center gap-2">
-                <CalendarDays className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                <CalendarDays className="w-5 h-5 text-primary-600 dark:text-primary-400" />
                 <h3 className="font-bold text-lg text-slate-900 dark:text-white">
                   November 2026
                 </h3>
               </div>
               <div className="flex items-center gap-2">
-                <button className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800">
+                <button className="p-1.5 rounded-lg border border-white/60 dark:border-white/10 bg-white/30 dark:bg-white/5 hover:bg-white/50 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300">
                   <ChevronLeft className="w-4 h-4" />
                 </button>
-                <button className="px-3 py-1 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-semibold hover:bg-slate-100 dark:hover:bg-slate-800">
+                <button className="px-3 py-1 rounded-lg border border-white/60 dark:border-white/10 bg-white/30 dark:bg-white/5 text-xs font-semibold hover:bg-white/50 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300">
                   Today
                 </button>
-                <button className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800">
+                <button className="p-1.5 rounded-lg border border-white/60 dark:border-white/10 bg-white/30 dark:bg-white/5 hover:bg-white/50 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300">
                   <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
@@ -70,19 +70,19 @@ export function Calendar() {
                     onClick={() => setSelectedDay(day)}
                     className={`min-h-[72px] sm:min-h-[88px] p-1.5 rounded-xl border text-left flex flex-col justify-between transition-all cursor-pointer ${
                       isSelected
-                        ? 'border-indigo-600 ring-2 ring-indigo-500/20 bg-indigo-50/30 dark:bg-indigo-950/20'
+                        ? 'border-primary-500 ring-2 ring-primary-500/20 bg-primary-50/40 dark:bg-primary-950/30'
                         : isToday
-                        ? 'border-indigo-300 dark:border-indigo-800 bg-slate-50/60 dark:bg-slate-900/40'
-                        : 'border-slate-100 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-[#161F30]/60'
+                        ? 'border-primary-400 dark:border-primary-700 bg-primary-50/20 dark:bg-primary-900/20'
+                        : 'border-white/50 dark:border-white/10 hover:border-primary-300 dark:hover:border-primary-600 bg-white/40 dark:bg-white/5'
                     }`}
                   >
                     <div className="flex items-center justify-between">
                       <span
                         className={`text-xs font-bold w-6 h-6 rounded-lg flex items-center justify-center ${
                           isToday
-                            ? 'bg-indigo-600 text-white shadow-xs'
+                            ? 'bg-primary-600 dark:bg-primary-500 text-white shadow-xs'
                             : isSelected
-                            ? 'text-indigo-600 dark:text-indigo-400'
+                            ? 'text-primary-600 dark:text-primary-400'
                             : 'text-slate-700 dark:text-slate-300'
                         }`}
                       >
@@ -94,7 +94,7 @@ export function Calendar() {
                       {events.map((ev, evIdx) => (
                         <div
                           key={evIdx}
-                          className="text-[9px] font-semibold px-1.5 py-0.5 rounded truncate bg-indigo-100/70 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300"
+                          className="text-[9px] font-semibold px-1.5 py-0.5 rounded truncate bg-primary-100/70 dark:bg-primary-950/60 text-primary-800 dark:text-primary-200 border border-primary-200/50 dark:border-primary-800/50"
                         >
                           {ev.title}
                         </div>
@@ -125,13 +125,13 @@ export function Calendar() {
                 selectedEvents.map((ev, idx) => (
                   <div
                     key={idx}
-                    className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/40 space-y-1"
+                    className="p-3 rounded-xl border border-white/60 dark:border-white/10 bg-white/40 dark:bg-white/5 space-y-1"
                   >
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold text-slate-900 dark:text-white">
                         {ev.title}
                       </span>
-                      <span className="text-[10px] uppercase font-semibold text-indigo-600 dark:text-indigo-400">
+                      <span className="text-[10px] uppercase font-semibold text-primary-600 dark:text-primary-400">
                         {ev.type}
                       </span>
                     </div>

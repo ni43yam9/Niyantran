@@ -151,7 +151,7 @@ export function MyTasks() {
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       {/* Filters, Tabs & Search */}
-      <div className="bg-white dark:bg-[#111827] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-card">
+      <div className="glass-card p-4 sm:p-5">
         <TaskFilters
           activeTab={activeTab}
           onSelectTab={setActiveTab}
@@ -173,8 +173,8 @@ export function MyTasks() {
       {/* Task List */}
       <div className="space-y-3">
         {filteredTasks.length === 0 ? (
-          <div className="text-center py-16 bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-2xs">
-            <ListFilter className="w-10 h-10 mx-auto text-slate-400 dark:text-slate-600 mb-3" />
+          <div className="text-center py-16 glass-card p-6">
+            <ListFilter className="w-10 h-10 mx-auto text-slate-400 dark:text-slate-500 mb-3" />
             <h3 className="text-base font-bold text-slate-800 dark:text-slate-200">
               No tasks found
             </h3>

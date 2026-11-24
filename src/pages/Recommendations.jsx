@@ -193,9 +193,12 @@ export function Recommendations() {
   return (
     <div className="space-y-6">
       {/* 1. Header Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-5 rounded-2xl bg-gradient-to-r from-indigo-900/20 via-purple-900/10 to-slate-900/20 dark:from-indigo-950/40 dark:via-purple-950/30 dark:to-slate-950/40 border border-indigo-200/50 dark:border-indigo-800/40">
-        <div className="flex items-start gap-3.5">
-          <div className="p-2.5 rounded-xl bg-indigo-600 text-white shadow-md shadow-indigo-600/30">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-5 rounded-2xl glass-silver-gradient backdrop-blur-xl relative overflow-hidden group">
+        <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-gradient-to-br from-[#568B75]/25 dark:from-[#75B798]/20 to-transparent blur-2xl pointer-events-none" />
+        <div className="absolute -bottom-10 -left-10 w-44 h-44 rounded-full bg-gradient-to-tr from-slate-200/50 dark:from-white/10 to-transparent blur-2xl pointer-events-none" />
+
+        <div className="relative z-10 flex items-start gap-3.5">
+          <div className="p-2.5 rounded-xl bg-[#568B75] dark:bg-[#75B798] text-white dark:text-[#101C18] shadow-md shadow-emerald-900/15">
             <Sparkles className="w-5 h-5" />
           </div>
           <div>
@@ -203,7 +206,7 @@ export function Recommendations() {
               <h1 className="text-xl font-bold text-slate-900 dark:text-white">
                 Intelligent Productivity Recommendations
               </h1>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#568B75]/15 dark:bg-[#75B798]/20 text-[#568B75] dark:text-[#75B798] border border-[#568B75]/30 dark:border-[#75B798]/30">
                 Phase 4
               </span>
             </div>
@@ -216,7 +219,7 @@ export function Recommendations() {
         <button
           onClick={handleGenerate}
           disabled={refreshing}
-          className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-sm transition-all cursor-pointer disabled:opacity-50 shrink-0"
+          className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white text-xs font-semibold shadow-sm transition-all cursor-pointer disabled:opacity-50 shrink-0"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
           <span>{refreshing ? 'Analyzing...' : 'Scan & Evaluate'}</span>
@@ -225,18 +228,18 @@ export function Recommendations() {
 
       {/* 2. Top Summary KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-4 rounded-xl bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 shadow-xs">
+        <div className="glass-card p-4">
           <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs font-medium">
             <span>Active Recommendations</span>
-            <Sparkles className="w-4 h-4 text-indigo-500" />
+            <Sparkles className="w-4 h-4 text-primary-500" />
           </div>
           <p className="text-2xl font-bold text-slate-900 dark:text-white mt-2">
             {summary?.total_active ?? 0}
           </p>
-          <span className="text-[11px] text-slate-500">Requires attention</span>
+          <span className="text-[11px] text-slate-500 dark:text-slate-400">Requires attention</span>
         </div>
 
-        <div className="p-4 rounded-xl bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 shadow-xs">
+        <div className="glass-card p-4">
           <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs font-medium">
             <span>High Priority / Critical</span>
             <ShieldAlert className="w-4 h-4 text-rose-500" />
@@ -244,10 +247,10 @@ export function Recommendations() {
           <p className="text-2xl font-bold text-rose-600 dark:text-rose-400 mt-2">
             {summary?.high_priority_count ?? 0}
           </p>
-          <span className="text-[11px] text-slate-500">Urgent risks & deadlines</span>
+          <span className="text-[11px] text-slate-500 dark:text-slate-400">Urgent risks & deadlines</span>
         </div>
 
-        <div className="p-4 rounded-xl bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 shadow-xs">
+        <div className="glass-card p-4">
           <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs font-medium">
             <span>Workload Balance</span>
             <SlidersHorizontal className="w-4 h-4 text-amber-500" />
@@ -255,10 +258,10 @@ export function Recommendations() {
           <p className="text-2xl font-bold text-amber-600 dark:text-amber-400 mt-2">
             {summary?.by_type?.WORKLOAD_BALANCE ?? 0}
           </p>
-          <span className="text-[11px] text-slate-500">Overload prevention</span>
+          <span className="text-[11px] text-slate-500 dark:text-slate-400">Overload prevention</span>
         </div>
 
-        <div className="p-4 rounded-xl bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 shadow-xs">
+        <div className="glass-card p-4">
           <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs font-medium">
             <span>Habits & Goals</span>
             <Target className="w-4 h-4 text-emerald-500" />
@@ -266,7 +269,7 @@ export function Recommendations() {
           <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-2">
             {(summary?.by_type?.HABIT_IMPROVEMENT ?? 0) + (summary?.by_type?.GOAL_PROGRESS ?? 0)}
           </p>
-          <span className="text-[11px] text-slate-500">Momentum actions</span>
+          <span className="text-[11px] text-slate-500 dark:text-slate-400">Momentum actions</span>
         </div>
       </div>
 
@@ -358,7 +361,7 @@ export function Recommendations() {
             return (
               <div
                 key={rec.id}
-                className="flex flex-col justify-between p-5 rounded-2xl bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 shadow-xs hover:border-indigo-200 dark:hover:border-indigo-800/60 transition-all space-y-4"
+                className="glass-card glass-card-hover p-5 flex flex-col justify-between space-y-4"
               >
                 {/* Header row */}
                 <div>
@@ -381,7 +384,7 @@ export function Recommendations() {
                 </div>
 
                 {/* Explainability / Deterministic Reason Callout */}
-                <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800/80">
+                <div className="p-3 rounded-xl bg-white/40 dark:bg-white/5 border border-white/60 dark:border-white/10">
                   <div className="flex items-start gap-2">
                     <Lightbulb className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
                     <div>

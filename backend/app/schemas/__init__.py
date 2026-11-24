@@ -9,6 +9,35 @@ from backend.app.schemas.recommendation import (
     RecommendationResponse,
     RecommendationSummary,
 )
+from backend.app.schemas.predictive import (
+    PredictiveInsightResponse,
+    PredictiveRiskSummary,
+    PredictiveOverviewResponse,
+    PredictionEvaluationResponse,
+    PredictionRefreshResponse,
+)
+from backend.app.schemas.adaptive import (
+    LearnedPatternsResponse,
+    PredictionCalibrationResponse,
+    AdaptiveSchedulingResponse,
+    ProductivityProfileResponse,
+    ProfileRefreshResponse,
+)
+from backend.app.schemas.sync import (
+    SyncOperationItem,
+    SyncPushRequest,
+    SyncPushResultItem,
+    SyncPushResponse,
+    SyncChangeItem,
+    SyncPullResponse,
+    SyncStatusResponse,
+    SyncAcknowledgeRequest,
+    SyncAcknowledgeResponse,
+    SyncConflictItem,
+    SyncConflictRecordRequest,
+    SyncConflictResolveRequest,
+    SyncConflictListResponse,
+)
 
 __all__ = [
     "TaskCreate",
@@ -26,4 +55,27 @@ __all__ = [
     "RecommendationUpdate",
     "RecommendationResponse",
     "RecommendationSummary",
+    "PredictiveInsightResponse",
+    "PredictiveRiskSummary",
+    "PredictiveOverviewResponse",
+    "PredictionEvaluationResponse",
+    "PredictionRefreshResponse",
+    "LearnedPatternsResponse",
+    "PredictionCalibrationResponse",
+    "AdaptiveSchedulingResponse",
+    "ProductivityProfileResponse",
+    "ProfileRefreshResponse",
+    "SyncOperationItem",
+    "SyncPushRequest",
+    "SyncPushResultItem",
+    "SyncPushResponse",
+    "SyncChangeItem",
+    "SyncPullResponse",
+    "SyncStatusResponse",
+    "SyncAcknowledgeRequest",
+    "SyncAcknowledgeResponse",
+    "SyncConflictItem",
+    "SyncConflictRecordRequest",
+    "SyncConflictResolveRequest",
+    "SyncConflictListResponse",
 ]

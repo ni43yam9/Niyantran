@@ -8,10 +8,12 @@
     "build": "vite build",
     "lint": "oxlint",
     "preview": "vite preview",
+    "test:frontend": "vitest run",
     "backend": "uvicorn backend.app.main:app --reload --port 8000",
     "test:backend": "pytest backend/tests -v"
   },
   "dependencies": {
+    "dexie": "^4.4.7",
     "lucide-react": "^1.74.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
@@ -23,9 +25,11 @@
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.2",
     "autoprefixer": "^10.6.2",
+    "fake-indexeddb": "^6.2.8",
     "oxlint": "^1.90.0",
     "postcss": "^8.5.33",
     "tailwindcss": "^3.4.19",
-    "vite": "^8.3.6"
+    "vite": "^8.3.6",
+    "vitest": "^5.1.1"
   }
 }

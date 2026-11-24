@@ -33,8 +33,10 @@ export function Analytics() {
   const { theme } = useTheme();
 
   const isDark = theme === 'dark';
-  const gridColor = isDark ? '#1E293B' : '#F1F5F9';
-  const textColor = isDark ? '#94A3B8' : '#64748B';
+  const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(36, 60, 50, 0.08)';
+  const textColor = isDark ? '#9BB3A5' : '#718579';
+  const primaryColor = isDark ? '#75B798' : '#568B75';
+  const plannedColor = isDark ? 'rgba(255, 255, 255, 0.12)' : '#C9DFD1';
 
   // Active view tab: 'weekly' | 'daily' | 'monthly' | 'time' | 'insights'
   const [activeTab, setActiveTab] = useState('weekly');
@@ -242,30 +244,41 @@ export function Analytics() {
       {activeTab === 'weekly' && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
-              <Card>
+            <div className="lg:col-span-2 min-w-0">
+              <Card className="flex flex-col">
                 <CardHeader
                   title="Weekly Deliverable Velocity"
                   subtitle="Planned vs Completed deliverables per day"
                   icon={BarChart3}
                 />
-                <div className="w-full mt-3 min-h-[280px]">
-                  <ResponsiveContainer width="100%" height={280}>
+                <div className="h-72 w-full mt-3 min-w-0">
+                  <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                     <BarChart data={weeklyChartItems} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
-                      <XAxis dataKey="day" stroke={textColor} fontSize={11} />
-                      <YAxis stroke={textColor} fontSize={11} allowDecimals={false} />
+                      <XAxis dataKey="day" stroke={textColor} fontSize={11} tickLine={false} />
+                      <YAxis stroke={textColor} fontSize={11} tickLine={false} axisLine={false} allowDecimals={false} />
                       <Tooltip
                         contentStyle={{
-                          backgroundColor: isDark ? '#111827' : '#fff',
-                          borderColor: isDark ? '#1E293B' : '#E2E8F0',
-                          borderRadius: '0.75rem',
+                          backgroundColor: isDark ? 'rgba(18, 32, 28, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+                          borderColor: isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 0.85)',
+                          borderRadius: '1rem',
+                          color: isDark ? '#E8F3EC' : '#243C32',
                         }}
                       />
-                      <Bar dataKey="planned" fill={isDark ? '#334155' : '#CBD5E1'} radius={[4, 4, 0, 0]} name="Planned Deliverables" />
-                      <Bar dataKey="completed" fill="#6366F1" radius={[4, 4, 0, 0]} name="Completed Deliverables" />
+                      <Bar dataKey="planned" fill={plannedColor} radius={[6, 6, 0, 0]} barSize={14} name="Planned Deliverables" />
+                      <Bar dataKey="completed" fill={primaryColor} radius={[6, 6, 0, 0]} barSize={14} name="Completed Deliverables" />
                     </BarChart>
                   </ResponsiveContainer>
+                </div>
+                <div className="flex items-center justify-center gap-6 mt-3 pt-3 border-t border-white/60 dark:border-white/10 text-xs text-slate-500 dark:text-slate-400">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#568B75] dark:bg-[#75B798]" />
+                    <span>Completed</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-slate-400 dark:bg-slate-600" />
+                    <span>Planned</span>
+                  </div>
                 </div>
               </Card>
             </div>
@@ -362,21 +375,22 @@ export function Analytics() {
             </div>
 
             {dailyHourlyItems.length > 0 && (
-              <div className="w-full mt-4 min-h-[220px]">
+              <div className="h-56 w-full mt-4 min-w-0">
                 <p className="text-xs font-semibold text-slate-500 mb-2">Hourly Output Density</p>
-                <ResponsiveContainer width="100%" height={220}>
+                <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                   <BarChart data={dailyHourlyItems}>
                     <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
-                    <XAxis dataKey="time" stroke={textColor} fontSize={10} />
-                    <YAxis stroke={textColor} fontSize={10} />
+                    <XAxis dataKey="time" stroke={textColor} fontSize={10} tickLine={false} />
+                    <YAxis stroke={textColor} fontSize={10} tickLine={false} axisLine={false} />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: isDark ? '#111827' : '#fff',
-                        borderColor: isDark ? '#1E293B' : '#E2E8F0',
-                        borderRadius: '0.75rem',
+                        backgroundColor: isDark ? 'rgba(18, 32, 28, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+                        borderColor: isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 0.85)',
+                        borderRadius: '1rem',
+                        color: isDark ? '#E8F3EC' : '#243C32',
                       }}
                     />
-                    <Bar dataKey="completions" fill="#10B981" radius={[3, 3, 0, 0]} name="Tasks Finished" />
+                    <Bar dataKey="completions" fill={primaryColor} radius={[6, 6, 0, 0]} barSize={14} name="Tasks Finished" />
                   </BarChart>
                 </ResponsiveContainer>
               </div>

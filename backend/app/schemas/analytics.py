@@ -105,3 +105,120 @@ class InsightsResponse(BaseModel):
     total_insights: int
     has_sufficient_data: bool
     data_sufficiency_message: Optional[str] = None
+
+# ===========================================================================
+# Phase 8: Advanced Productivity Analytics & Insights Schemas
+# ===========================================================================
+
+class ScoreBreakdown(BaseModel):
+    task_completion_points: float = Field(..., description="Max 25.0 points based on completed/created ratio")
+    priority_weight_points: float = Field(..., description="Max 20.0 points based on priority weighted completions")
+    deadline_adherence_points: float = Field(..., description="Max 20.0 points based on on-time delivery vs overdue debt")
+    goal_progress_points: float = Field(..., description="Max 15.0 points based on active goal progress velocity")
+    habit_consistency_points: float = Field(..., description="Max 15.0 points based on 14-day habit consistency")
+    trend_modifier_points: float = Field(..., description="[-5.0 to +5.0] points based on recent velocity vs backlog growth")
+    total_score: int = Field(..., description="Composite 0-100 explainable score")
+
+class ProductivityScoreDetail(BaseModel):
+    score: int
+    level: str  # 'Exceptional', 'High', 'Balanced', 'Developing', 'Needs Focus', 'Baseline'
+    breakdown: ScoreBreakdown
+    methodology_explanation: str
+    backlog_expansion_flag: bool
+    has_sufficient_data: bool
+    disclaimer: str
+    evaluated_at: datetime
+
+class TaskAnalyticsDetail(BaseModel):
+    total_tasks: int
+    completed_tasks: int
+    pending_tasks: int
+    overdue_tasks: int
+    postponed_tasks: int
+    completion_rate: float
+    priority_completion_rates: Dict[str, float]
+    category_completion_rates: Dict[str, float]
+    completions_by_day_of_week: Dict[str, int]
+    average_lead_time_hours: Optional[float] = None
+    has_sufficient_data: bool
+    summary: str
+
+class GoalAnalyticsDetail(BaseModel):
+    total_goals: int
+    completed_goals: int
+    active_goals: int
+    average_progress: float
+    delayed_goals_count: int
+    on_track_goals_count: int
+    average_velocity_percent_per_day: float
+    predictive_trajectories: List[Dict[str, Any]] = Field(default_factory=list)
+    has_sufficient_data: bool
+    summary: str
+
+class HabitAnalyticsDetail(BaseModel):
+    total_habits: int
+    active_habits: int
+    adherence_7d: float
+    adherence_14d: float
+    adherence_30d: float
+    longest_streak: int
+    active_streaks_count: int
+    missed_days_last_4d: int
+    habit_trend: str  # 'Improving', 'Steady', 'Declining', 'Insufficient Data'
+    has_sufficient_data: bool
+    summary: str
+
+class PeriodComparison(BaseModel):
+    period_label: str
+    current_period_days_elapsed: int
+    comparison_mode: str  # 'DAY_ALIGNED_SLICE', 'PRO_RATED_VELOCITY', 'FULL_PERIOD'
+    current_completions: int
+    previous_aligned_completions: int
+    velocity_delta_percent: float
+    trend: str  # 'Improving', 'Steady', 'Declining', 'Insufficient Data'
+    explanation: str
+
+class ProductivityTrendsDetail(BaseModel):
+    daily_trend: PeriodComparison
+    weekly_trend: PeriodComparison
+    monthly_trend: PeriodComparison
+    overall_momentum: str
+    has_sufficient_data: bool
+
+class TimeDistributionDetail(BaseModel):
+    total_tracked_duration_minutes: int
+    total_estimated_duration_minutes: int
+    has_tracked_duration_data: bool
+    estimation_bias_ratio: float
+    is_bias_empirical: bool
+    deep_work_focus_minutes: int
+    category_durations: Dict[str, Dict[str, int]]
+    working_hour_distribution: Dict[str, int]
+    data_notes: str
+
+class WeeklyProductivityReport(BaseModel):
+    report_id: str
+    week_start: date
+    week_end: date
+    productivity_score: int
+    task_summary: Dict[str, Any]
+    goal_summary: Dict[str, Any]
+    habit_summary: Dict[str, Any]
+    time_summary: Dict[str, Any]
+    key_achievements: List[str]
+    actionable_recommendations: List[str]
+    generated_at: datetime
+
+class MonthlyProductivityReport(BaseModel):
+    report_id: str
+    year: int
+    month: int
+    month_name: str
+    productivity_score: int
+    monthly_velocity_delta: float
+    task_summary: Dict[str, Any]
+    goal_summary: Dict[str, Any]
+    habit_summary: Dict[str, Any]
+    key_milestones: List[str]
+    actionable_recommendations: List[str]
+    generated_at: datetime

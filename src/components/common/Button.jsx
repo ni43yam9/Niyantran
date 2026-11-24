@@ -11,21 +11,21 @@ export function Button({
   ...props
 }) {
   const baseStyles =
-    'inline-flex items-center justify-center font-medium rounded-lg transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer select-none';
+    'inline-flex items-center justify-center font-medium rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer select-none';
 
   const variants = {
     primary:
-      'bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm focus:ring-indigo-500 dark:bg-indigo-600 dark:hover:bg-indigo-500',
+      'bg-[#568B75] hover:bg-[#467360] active:bg-[#385C4D] text-white shadow-sm focus:ring-[#568B75]/50 dark:bg-[#75B798] dark:hover:bg-[#86c4a6] dark:active:bg-[#568B75] dark:text-[#101C18] font-semibold',
     secondary:
-      'bg-slate-100 hover:bg-slate-200 text-slate-800 focus:ring-slate-400 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-100',
+      'glass-btn-secondary focus:ring-[#568B75]/30',
     outline:
-      'border border-slate-300 hover:bg-slate-50 text-slate-700 focus:ring-slate-400 dark:border-slate-700 dark:hover:bg-slate-800/60 dark:text-slate-200',
+      'border border-white/60 dark:border-white/10 hover:bg-white/40 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 focus:ring-slate-400',
     ghost:
-      'text-slate-600 hover:bg-slate-100 hover:text-slate-900 focus:ring-slate-400 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100',
+      'text-slate-600 hover:bg-white/40 hover:text-slate-900 focus:ring-slate-400 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-slate-100',
     danger:
-      'bg-rose-600 hover:bg-rose-700 text-white focus:ring-rose-500 dark:bg-rose-600 dark:hover:bg-rose-500',
+      'bg-[#DC6B6B] hover:bg-[#c95858] text-white focus:ring-[#DC6B6B]/50 dark:bg-[#F08080] dark:hover:bg-[#e07070] dark:text-[#101C18]',
     subtle:
-      'bg-indigo-50 hover:bg-indigo-100 text-indigo-700 focus:ring-indigo-400 dark:bg-indigo-950/40 dark:hover:bg-indigo-900/60 dark:text-indigo-300',
+      'bg-[#568B75]/15 hover:bg-[#568B75]/25 text-[#243C32] focus:ring-[#568B75]/40 dark:bg-[#75B798]/15 dark:hover:bg-[#75B798]/25 dark:text-[#75B798]',
   };
 
   const sizes = {

@@ -6,6 +6,7 @@ import { MobileBottomNav } from './MobileBottomNav';
 import { RightPanel } from './RightPanel';
 import { TaskModal } from '../tasks/TaskModal';
 import { GoalModal } from '../goals/GoalModal';
+import { NotificationModal } from './NotificationModal';
 import { useApp } from '../../context/AppContext';
 
 export function Layout() {
@@ -19,13 +20,15 @@ export function Layout() {
     isGoalModalOpen,
     closeAddGoalModal,
     editingGoal,
+    isNotificationOpen,
+    closeNotificationCenter,
   } = useApp();
 
   // Show right panel primarily on Dashboard or Tasks unless user collapsed it
   const showRightPanel = isRightPanelOpen && (location.pathname === '/' || location.pathname === '/tasks');
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0B0F19] text-slate-900 dark:text-slate-100 flex flex-col antialiased transition-colors duration-200">
+    <div className="min-h-screen bg-transparent text-slate-900 dark:text-slate-100 flex flex-col antialiased transition-colors duration-300">
       {/* Mobile Top Header */}
       <MobileHeader />
 
@@ -40,10 +43,10 @@ export function Layout() {
             <button
               type="button"
               onClick={() => setIsRightPanelOpen(true)}
-              className="hidden xl:flex fixed top-4 right-4 z-20 items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/95 dark:bg-[#111827]/95 border border-slate-200/90 dark:border-slate-800 shadow-md backdrop-blur-md text-xs font-semibold text-slate-700 dark:text-slate-300 hover:border-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all cursor-pointer"
+              className="hidden xl:flex fixed top-4 right-4 z-20 items-center gap-1.5 px-3 py-1.5 rounded-xl glass-card text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-sage-primary dark:hover:text-forest-primary transition-all cursor-pointer"
               title="Open Agenda & Priorities Panel"
             >
-              <PanelRight className="w-4 h-4 text-indigo-500" />
+              <PanelRight className="w-4 h-4 text-sage-primary dark:text-forest-primary" />
               <span>Agenda</span>
             </button>
           )}
@@ -74,6 +77,12 @@ export function Layout() {
         isOpen={isGoalModalOpen}
         onClose={closeAddGoalModal}
         editingGoal={editingGoal}
+      />
+
+      {/* Deadline Notifications Center Modal */}
+      <NotificationModal
+        isOpen={isNotificationOpen}
+        onClose={closeNotificationCenter}
       />
     </div>
   );

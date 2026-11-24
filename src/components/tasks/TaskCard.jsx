@@ -24,12 +24,12 @@ export function TaskCard({ task, onToggleComplete, onEdit, onDelete }) {
 
   return (
     <div
-      className={`group relative rounded-xl border p-4 sm:p-5 transition-all duration-200 ${
+      className={`group relative rounded-2xl p-4 sm:p-5 transition-all duration-300 ${
         isCompleted
-          ? 'bg-slate-50/50 dark:bg-slate-900/30 border-slate-200/60 dark:border-slate-800/60 opacity-80'
+          ? 'glass-card border-[#568B75]/40 dark:border-[#75B798]/25 opacity-80'
           : isOverdue
-          ? 'bg-rose-50/20 dark:bg-rose-950/10 border-rose-200/80 dark:border-rose-900/40 hover:border-rose-300 shadow-card'
-          : 'bg-white dark:bg-[#131B2E] border-slate-200/90 dark:border-slate-800/80 hover:border-indigo-200 dark:hover:border-indigo-900/60 hover:shadow-card-hover'
+          ? 'glass-card border-[#DC6B6B]/40 dark:border-[#F08080]/30 hover:border-[#DC6B6B]/60 glass-card-hover'
+          : 'glass-card glass-card-hover hover:border-[#568B75]/40 dark:hover:border-[#75B798]/30'
       }`}
     >
       <div className="flex items-start justify-between gap-3">
@@ -39,11 +39,11 @@ export function TaskCard({ task, onToggleComplete, onEdit, onDelete }) {
           <button
             type="button"
             onClick={() => onToggleComplete(task.id)}
-            className="mt-0.5 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors shrink-0 cursor-pointer"
+            className="mt-0.5 text-slate-400 hover:text-[#568B75] dark:hover:text-[#75B798] transition-colors shrink-0 cursor-pointer"
             aria-label={isCompleted ? 'Mark pending' : 'Mark completed'}
           >
             {isCompleted ? (
-              <CheckCircle2 className="w-5 h-5 text-emerald-500 fill-emerald-50 dark:fill-emerald-950" />
+              <CheckCircle2 className="w-5 h-5 text-[#568B75] dark:text-[#75B798] fill-[#568B75]/20 dark:fill-[#75B798]/20" />
             ) : (
               <Circle className="w-5 h-5" />
             )}

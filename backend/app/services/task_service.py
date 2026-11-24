@@ -22,8 +22,11 @@ def get_tasks(
     is_overdue: Optional[bool] = None,
     skip: int = 0,
     limit: int = 100,
+    user_id: Optional[str] = None,
 ) -> List[TaskResponse]:
-    query = db.query(Task).options(joinedload(Task.goal))
+    query = db.query(Task).options(joinedload(Task.goal)).filter(Task.is_deleted == False)
+    if user_id:
+        query = query.filter(Task.user_id == user_id)
     today = date.today()
 
     if status:
@@ -56,8 +59,11 @@ def get_tasks(
 
     return [TaskResponse.from_orm_model(t) for t in tasks]
 
-def get_task_by_id(db: Session, task_id: str) -> Optional[TaskResponse]:
-    task = db.query(Task).options(joinedload(Task.goal)).filter(Task.id == task_id).first()
+def get_task_by_id(db: Session, task_id: str, user_id: Optional[str] = None) -> Optional[TaskResponse]:
+    query = db.query(Task).options(joinedload(Task.goal)).filter(Task.id == task_id, Task.is_deleted == False)
+    if user_id:
+        query = query.filter(Task.user_id == user_id)
+    task = query.first()
     if not task:
         return None
     return TaskResponse.from_orm_model(task)
@@ -70,7 +76,7 @@ def _safe_record_activity(db: Session, **kwargs):
         import logging
         logging.getLogger("niyantra").warning(f"Activity logging fallback: {e}")
 
-def create_task(db: Session, task_in: TaskCreate) -> TaskResponse:
+def create_task(db: Session, task_in: TaskCreate, user_id: Optional[str] = None) -> TaskResponse:
     task_id = task_in.id or generate_task_id()
 
     # Validate goal exists if goal_id provided
@@ -85,6 +91,7 @@ def create_task(db: Session, task_in: TaskCreate) -> TaskResponse:
 
     task = Task(
         id=task_id,
+        user_id=user_id or "default_user",
         title=task_in.title.strip(),
         description=task_in.description.strip() if task_in.description else "",
         task_type=task_in.task_type,
@@ -122,8 +129,11 @@ def create_task(db: Session, task_in: TaskCreate) -> TaskResponse:
 
     return TaskResponse.from_orm_model(task)
 
-def update_task(db: Session, task_id: str, task_in: TaskUpdate) -> Optional[TaskResponse]:
-    task = db.query(Task).filter(Task.id == task_id).first()
+def update_task(db: Session, task_id: str, task_in: TaskUpdate, user_id: Optional[str] = None) -> Optional[TaskResponse]:
+    query = db.query(Task).filter(Task.id == task_id, Task.is_deleted == False)
+    if user_id:
+        query = query.filter(Task.user_id == user_id)
+    task = query.first()
     if not task:
         return None
 
@@ -133,7 +143,7 @@ def update_task(db: Session, task_id: str, task_in: TaskUpdate) -> Optional[Task
 
     # Check goal_id validity if explicitly updated
     if "goal_id" in update_data and update_data["goal_id"] is not None:
-        goal_exists = db.query(Goal.id).filter(Goal.id == update_data["goal_id"]).first()
+        goal_exists = db.query(Goal.id).filter(Goal.id == update_data["goal_id"], Goal.is_deleted == False).first()
         if not goal_exists:
             update_data["goal_id"] = None
 
@@ -147,6 +157,7 @@ def update_task(db: Session, task_id: str, task_in: TaskUpdate) -> Optional[Task
     for field, val in update_data.items():
         setattr(task, field, val)
 
+    task.version = (task.version or 1) + 1
     task.updated_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(task)
@@ -183,8 +194,11 @@ def update_task(db: Session, task_id: str, task_in: TaskUpdate) -> Optional[Task
 
     return TaskResponse.from_orm_model(task)
 
-def delete_task(db: Session, task_id: str) -> bool:
-    task = db.query(Task).filter(Task.id == task_id).first()
+def delete_task(db: Session, task_id: str, user_id: Optional[str] = None) -> bool:
+    query = db.query(Task).filter(Task.id == task_id, Task.is_deleted == False)
+    if user_id:
+        query = query.filter(Task.user_id == user_id)
+    task = query.first()
     if not task:
         return False
     from backend.app.models.timeblock import DailyTimeblock
@@ -196,12 +210,19 @@ def delete_task(db: Session, task_id: str) -> bool:
         entity_id=task_id,
         details={"title": task.title},
     )
-    db.delete(task)
+    now_utc = datetime.now(timezone.utc)
+    task.is_deleted = True
+    task.deleted_at = now_utc
+    task.version = (task.version or 1) + 1
+    task.updated_at = now_utc
     db.commit()
     return True
 
-def set_task_status(db: Session, task_id: str, status: str) -> Optional[TaskResponse]:
-    task = db.query(Task).filter(Task.id == task_id).first()
+def set_task_status(db: Session, task_id: str, status: str, user_id: Optional[str] = None) -> Optional[TaskResponse]:
+    query = db.query(Task).filter(Task.id == task_id, Task.is_deleted == False)
+    if user_id:
+        query = query.filter(Task.user_id == user_id)
+    task = query.first()
     if not task:
         return None
 
@@ -212,6 +233,7 @@ def set_task_status(db: Session, task_id: str, status: str) -> Optional[TaskResp
     else:
         task.completed_at = None
 
+    task.version = (task.version or 1) + 1
     task.updated_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(task)

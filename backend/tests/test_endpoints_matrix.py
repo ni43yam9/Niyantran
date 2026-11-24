@@ -174,7 +174,46 @@ def test_endpoints_inventory_coverage(client, db_session):
 
     assert client.post("/api/recommendations/nonexistent-rec-id/accept").status_code == 404
 
-    # 10. Clean Deletions (testing DELETE on all entities)
+    # 10. Predictive Intelligence Endpoints (Phase 4.5)
+    p_overview = client.get("/api/predictions/overview")
+    assert p_overview.status_code == 200
+    assert "summary" in p_overview.json()
+
+    assert client.get("/api/predictions/deadlines").status_code == 200
+    assert client.get("/api/predictions/goals").status_code == 200
+    assert client.get("/api/predictions/workload").status_code == 200
+    assert client.get("/api/predictions/habits").status_code == 200
+    assert client.get("/api/predictions/feasibility").status_code == 200
+    assert client.get("/api/predictions/productivity").status_code == 200
+
+    p_refresh = client.post("/api/predictions/refresh?bridge_recommendations=false")
+    assert p_refresh.status_code == 200
+    assert p_refresh.json()["status"] == "SUCCESS"
+
+    p_eval = client.post("/api/predictions/evaluate")
+    assert p_eval.status_code == 200
+
+    p_evals = client.get("/api/predictions/evaluations")
+    assert p_evals.status_code == 200
+
+    # 11. Adaptive Intelligence Endpoints (Phase 7)
+    assert client.get("/api/adaptive/profile").status_code == 200
+    assert client.post("/api/adaptive/profile/refresh").status_code == 200
+    assert client.get("/api/adaptive/patterns").status_code == 200
+    assert client.get("/api/adaptive/calibration").status_code == 200
+    assert client.get("/api/adaptive/scheduling-suggestions").status_code == 200
+    assert client.get("/api/adaptive/recommendation-weights").status_code == 200
+
+    # 12. Advanced Productivity Analytics Endpoints (Phase 8)
+    assert client.get("/api/analytics/score").status_code == 200
+    assert client.get("/api/analytics/tasks").status_code == 200
+    assert client.get("/api/analytics/habits").status_code == 200
+    assert client.get("/api/analytics/trends").status_code == 200
+    assert client.get("/api/analytics/time-distribution").status_code == 200
+    assert client.get("/api/analytics/reports/weekly").status_code == 200
+    assert client.get("/api/analytics/reports/monthly").status_code == 200
+
+    # 13. Clean Deletions (testing DELETE on all entities)
     assert client.delete(f"/api/tasks/{tid}").status_code == 200
     assert client.delete(f"/api/tasks/{tid}").status_code == 404  # already deleted
 
