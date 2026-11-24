@@ -10,7 +10,6 @@ from sqlalchemy import (
     Index,
     UniqueConstraint,
     JSON,
-    func,
 )
 from sqlalchemy.orm import relationship
 

@@ -14,7 +14,6 @@ from backend.app.schemas.analytics import (
     InsightsResponse,
     ProductivityScoreDetail,
     TaskAnalyticsDetail,
-    GoalAnalyticsDetail,
     HabitAnalyticsDetail,
     ProductivityTrendsDetail,
     TimeDistributionDetail,
@@ -25,7 +24,6 @@ from backend.app.services import analytics_service
 from backend.app.services.analytics import (
     calculate_explainable_productivity_score,
     analyze_tasks_in_depth,
-    analyze_goals_in_depth,
     analyze_habits_in_depth,
     compare_productivity_trends,
     analyze_time_distribution,

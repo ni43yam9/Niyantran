@@ -2,7 +2,6 @@ import uuid
 from datetime import date, datetime, timezone
 from typing import List, Optional, Dict
 from sqlalchemy.orm import Session
-from sqlalchemy import desc
 
 from backend.app.models.habit import Habit
 from backend.app.models.habit_log import HabitLog

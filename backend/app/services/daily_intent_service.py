@@ -3,7 +3,6 @@ import logging
 from datetime import date, datetime, timezone
 from typing import List, Optional
 from sqlalchemy.orm import Session
-from sqlalchemy import and_
 
 from backend.app.models.daily_intent import DailyIntent
 from backend.app.schemas.daily_intent import DailyIntentCreate, DailyIntentUpdate

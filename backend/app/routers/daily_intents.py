@@ -8,7 +8,6 @@ from backend.app.database import get_db
 from backend.app.models.user import User
 from backend.app.schemas.daily_intent import (
     DailyIntentCreate,
-    DailyIntentUpdate,
     DailyIntentResponse,
 )
 from backend.app.services import daily_intent_service

@@ -1,7 +1,7 @@
 from datetime import datetime, date, timedelta, timezone
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict
 from sqlalchemy.orm import Session
-from sqlalchemy import func, and_, or_
+from sqlalchemy import func, or_
 
 from backend.app.models.task import Task
 from backend.app.models.goal import Goal

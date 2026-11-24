@@ -3,8 +3,6 @@ import {
   Bell,
   X,
   AlertTriangle,
-  Clock,
-  CheckCircle2,
   Calendar,
   Sparkles,
   Volume2,

@@ -7,9 +7,7 @@ import {
   Laptop,
   Smartphone,
   X,
-  ArrowRight,
   RefreshCw,
-  Trash2,
   Edit3,
 } from 'lucide-react';
 import { db } from '../../database/db';
@@ -18,7 +16,6 @@ import {
   conflictResolver,
   entityMergeHelpers,
   RESOLUTION_STRATEGY,
-  CONFLICT_STATUS,
   registerConflictListener,
 } from '../../sync';
 import { syncManager } from '../../sync/syncManager';

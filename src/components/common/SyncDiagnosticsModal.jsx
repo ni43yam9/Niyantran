@@ -17,7 +17,6 @@ import {
   ShieldCheck,
   Smartphone,
   User,
-  Wifi,
   WifiOff,
   X,
 } from 'lucide-react';

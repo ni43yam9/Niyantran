@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from backend.app.core.security import get_current_user_optional
 from backend.app.database import get_db
 from backend.app.models.user import User
-from backend.app.schemas.habit import HabitCreate, HabitUpdate, HabitResponse, HabitLogCreate
+from backend.app.schemas.habit import HabitCreate, HabitUpdate, HabitResponse
 from backend.app.services import habit_service
 
 router = APIRouter(prefix="/api/habits", tags=["Habits"])

@@ -1,9 +1,7 @@
 import logging
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy.orm import Session
 
-from backend.app.database import get_db
 from backend.app.core.config import settings
 from backend.app.core.security import verify_api_key, is_auth_required
 from backend.app.services import backup_service

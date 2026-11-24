@@ -3,7 +3,6 @@ from typing import Optional, Tuple
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
-from backend.app.core.config import settings
 from backend.app.core.security import hash_password, verify_password, create_access_token
 from backend.app.models.user import User
 from backend.app.schemas.auth import UserRegisterRequest

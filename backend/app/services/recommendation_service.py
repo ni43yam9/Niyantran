@@ -1,9 +1,9 @@
 import logging
 import uuid
 from datetime import datetime, date, timedelta, timezone
-from typing import List, Optional, Dict, Any, Set
+from typing import List, Optional, Dict, Set
 from sqlalchemy.orm import Session
-from sqlalchemy import func, and_, or_
+from sqlalchemy import and_, or_
 
 from backend.app.models.recommendation import Recommendation
 from backend.app.models.task import Task

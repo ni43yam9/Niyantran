@@ -1,5 +1,5 @@
 import time
-from datetime import date, datetime, timezone
+from datetime import datetime, timezone
 from typing import Optional, List
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import or_, func

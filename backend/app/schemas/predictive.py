@@ -1,6 +1,6 @@
 from datetime import datetime, date
-from typing import Optional, List, Dict, Any
-from pydantic import BaseModel, Field, ConfigDict
+from typing import Optional, List
+from pydantic import BaseModel, ConfigDict
 
 class PredictiveInsightResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)

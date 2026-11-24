@@ -16,8 +16,6 @@ import {
   RESOLUTION_STRATEGY,
   SYNC_STATUS,
   SYNC_OPERATIONS,
-  ENTITY_TYPES,
-  SYNC_META_KEYS,
 } from './syncConstants';
 import {
   getTablePropertyForEntity,

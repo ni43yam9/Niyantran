@@ -1,7 +1,6 @@
 import { db } from '../database/db';
 import { syncQueue } from './syncQueue';
 import {
-  SYNC_OPERATIONS,
   SYNC_STATUS,
   SYNC_META_KEYS,
   ENGINE_STATUS,
@@ -15,7 +14,6 @@ import { timeblockRepository } from '../database/repositories/timeblockRepositor
 import { dailyIntentRepository } from '../database/repositories/dailyIntentRepository';
 import { recommendationRepository } from '../database/repositories/recommendationRepository';
 import { conflictDetector } from './conflictDetector';
-import { conflictResolver } from './conflictResolver';
 import { tabCoordinator } from './tabCoordinator';
 import { storageHealth } from '../utils/storageHealth';
 import { serviceWorkerRegistration } from '../utils/serviceWorkerRegistration';
